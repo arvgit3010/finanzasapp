@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FinanzApp — Acceso Seguro</title>
+<title>FinanzApp — Gestión Personal</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
@@ -15,25 +15,24 @@
   --green:#22d17a;--green-bg:rgba(34,209,122,.10);--green-border:rgba(34,209,122,.25);
   --red:#f25c5c;--red-bg:rgba(242,92,92,.10);--red-border:rgba(242,92,92,.25);
   --blue:#5b8cfa;--blue-bg:rgba(91,140,250,.10);--blue-border:rgba(91,140,250,.25);
-  --amber:#f5a623;--amber-bg:rgba(245,166,35,.10);
-  --purple:#a78bfa;
-  --radius:10px;--radius-lg:14px;--sidebar:230px;
+  --amber:#f5a623;--amber-bg:rgba(245,166,35,.10);--amber-border:rgba(245,166,35,.25);
+  --purple:#a78bfa;--purple-bg:rgba(167,139,250,.10);--purple-border:rgba(167,139,250,.25);
+  --radius:10px;--radius-lg:14px;--sidebar:240px;
   --font:'DM Sans',sans-serif;--mono:'DM Mono',monospace;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;font-family:var(--font);background:var(--bg);color:var(--text);font-size:14px}
 
-/* AUTH */
+/* ── AUTH ── */
 #auth-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999}
-.auth-card{background:var(--bg2);border:1px solid var(--border2);border-radius:20px;padding:36px 40px;width:420px;max-width:95%;box-shadow:0 32px 80px rgba(0,0,0,.6)}
+.auth-card{background:var(--bg2);border:1px solid var(--border2);border-radius:20px;padding:36px 40px;width:430px;max-width:95%;box-shadow:0 32px 80px rgba(0,0,0,.6)}
 .auth-logo{display:flex;align-items:center;gap:12px;margin-bottom:28px}
 .auth-logo-icon{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--blue),var(--purple));display:flex;align-items:center;justify-content:center;font-size:22px}
 .auth-logo-text{font-size:20px;font-weight:600;letter-spacing:-.4px}
 .auth-logo-sub{font-size:12px;color:var(--text3);margin-top:1px}
 .auth-steps{display:flex;gap:6px;margin-bottom:24px}
 .auth-step{flex:1;height:3px;border-radius:2px;background:var(--bg4);transition:background .3s}
-.auth-step.done{background:var(--blue)}
-.auth-step.active{background:linear-gradient(90deg,var(--blue),var(--purple))}
+.auth-step.done{background:var(--blue)}.auth-step.active{background:linear-gradient(90deg,var(--blue),var(--purple))}
 .auth-title{font-size:16px;font-weight:500;margin-bottom:6px}
 .auth-sub{font-size:13px;color:var(--text2);margin-bottom:22px;line-height:1.5}
 .auth-field{margin-bottom:14px}
@@ -43,8 +42,7 @@ html,body{height:100%;font-family:var(--font);background:var(--bg);color:var(--t
 .auth-field input.shake{animation:shake .4s}
 @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
 .auth-btn{width:100%;padding:12px;font-size:14px;font-weight:500;font-family:var(--font);border:none;border-radius:var(--radius);cursor:pointer;background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;transition:opacity .15s;margin-top:4px}
-.auth-btn:hover{opacity:.9}
-.auth-btn:active{opacity:.8;transform:scale(.99)}
+.auth-btn:hover{opacity:.9}.auth-btn:active{opacity:.8;transform:scale(.99)}
 .auth-error{background:var(--red-bg);border:1px solid var(--red-border);color:var(--red);border-radius:var(--radius);padding:10px 14px;font-size:13px;margin-bottom:14px;display:none}
 .auth-error.show{display:block}
 .otp-inputs{display:flex;gap:8px;justify-content:center;margin:8px 0 18px}
@@ -54,21 +52,30 @@ html,body{height:100%;font-family:var(--font);background:var(--bg);color:var(--t
 .attempts-info{font-size:12px;color:var(--text3);text-align:center;margin-top:10px}
 .attempts-info span{color:var(--red)}
 
-/* SETUP */
+/* ── SETUP ── */
 #setup-screen{position:fixed;inset:0;background:var(--bg);display:none;align-items:center;justify-content:center;z-index:9998;overflow-y:auto}
 #setup-screen.show{display:flex}
-.setup-card{background:var(--bg2);border:1px solid var(--border2);border-radius:20px;padding:36px 40px;width:480px;max-width:95%;margin:20px auto}
-.setup-step{display:none}
-.setup-step.active{display:block}
+.setup-card{background:var(--bg2);border:1px solid var(--border2);border-radius:20px;padding:36px 40px;width:500px;max-width:95%;margin:20px auto}
+.setup-step{display:none}.setup-step.active{display:block}
 .step-title{font-size:18px;font-weight:600;margin-bottom:6px}
 .step-sub{font-size:13px;color:var(--text2);margin-bottom:20px;line-height:1.5}
 .qr-wrap{background:white;border-radius:12px;padding:16px;display:inline-flex;align-items:center;justify-content:center;margin:16px auto}
 .secret-box{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:13px;color:var(--blue);letter-spacing:2px;text-align:center;margin:12px 0;cursor:pointer;transition:border-color .15s;word-break:break-all}
 .secret-box:hover{border-color:var(--blue)}
 .info-box{background:var(--blue-bg);border:1px solid var(--blue-border);border-radius:var(--radius);padding:12px 14px;font-size:13px;color:var(--text2);margin:14px 0;line-height:1.6}
-.info-box.warn{background:var(--amber-bg);border-color:rgba(245,166,35,.3);color:var(--amber)}
+.info-box.warn{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber)}
+.info-box.success{background:var(--green-bg);border-color:var(--green-border);color:var(--green)}
 
-/* APP */
+/* ── SHEETS SETUP ── */
+.gs-step{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px 18px;margin-bottom:10px;display:flex;gap:14px;align-items:flex-start}
+.gs-num{width:26px;height:26px;border-radius:50%;background:var(--blue-bg);border:1px solid var(--blue-border);color:var(--blue);font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.gs-step-title{font-size:13px;font-weight:500;margin-bottom:3px}
+.gs-step-desc{font-size:12px;color:var(--text2);line-height:1.5}
+.gs-step-desc a{color:var(--blue);text-decoration:none}
+.gs-step-desc a:hover{text-decoration:underline}
+.gs-step-desc code{background:var(--bg4);padding:2px 6px;border-radius:4px;font-family:var(--mono);font-size:11px;color:var(--text)}
+
+/* ── APP ── */
 .app{display:flex;height:100vh;overflow:hidden}
 .sidebar{width:var(--sidebar);min-width:var(--sidebar);background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column}
 .sidebar-logo{padding:22px 20px 18px;border-bottom:1px solid var(--border)}
@@ -84,10 +91,23 @@ html,body{height:100%;font-family:var(--font);background:var(--bg);color:var(--t
 .nav-item svg{width:16px;height:16px;flex-shrink:0}
 .nav-badge{margin-left:auto;background:var(--bg4);color:var(--text2);font-size:10px;padding:2px 7px;border-radius:20px;font-family:var(--mono)}
 .nav-item.active .nav-badge{background:var(--blue-bg);color:var(--blue)}
-.sidebar-footer{padding:14px;border-top:1px solid var(--border);font-size:11px;color:var(--text3);text-align:center}
-.session-info{padding:9px 12px;margin:0 0 8px;background:var(--green-bg);border:1px solid var(--green-border);border-radius:var(--radius);font-size:11px;color:var(--green);display:flex;align-items:center;gap:6px}
-.session-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.sidebar-footer{padding:12px 14px;border-top:1px solid var(--border);font-size:11px;color:var(--text3)}
+
+/* Sheets status bar */
+.sheets-status{margin:0 10px 8px;padding:9px 12px;border-radius:var(--radius);font-size:11px;display:flex;align-items:center;gap:7px;cursor:pointer;transition:opacity .15s}
+.sheets-status:hover{opacity:.8}
+.sheets-status.connected{background:var(--green-bg);border:1px solid var(--green-border);color:var(--green)}
+.sheets-status.disconnected{background:var(--amber-bg);border:1px solid var(--amber-border);color:var(--amber)}
+.sheets-status.syncing{background:var(--blue-bg);border:1px solid var(--blue-border);color:var(--blue)}
+.sheets-status.error{background:var(--red-bg);border:1px solid var(--red-border);color:var(--red)}
+.status-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.connected .status-dot{background:var(--green);animation:pulse 2s infinite}
+.syncing .status-dot{background:var(--blue);animation:pulse .8s infinite}
+.disconnected .status-dot{background:var(--amber)}
+.error .status-dot{background:var(--red)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.session-info{padding:9px 12px;margin:0 0 6px;background:var(--purple-bg);border:1px solid var(--purple-border);border-radius:var(--radius);font-size:11px;color:var(--purple);display:flex;align-items:center;gap:6px}
+.session-dot{width:6px;height:6px;border-radius:50%;background:var(--purple);flex-shrink:0;animation:pulse 2s infinite}
 
 .main{flex:1;overflow-y:auto;background:var(--bg)}
 .page{display:none;padding:28px 32px;min-height:100%}
@@ -98,14 +118,16 @@ html,body{height:100%;font-family:var(--font);background:var(--bg);color:var(--t
 .topbar-actions{display:flex;gap:8px;align-items:center}
 
 .btn{padding:8px 16px;border-radius:var(--radius);font-size:13px;font-weight:500;cursor:pointer;border:1px solid var(--border2);background:var(--bg3);color:var(--text);font-family:var(--font);transition:all .15s;display:inline-flex;align-items:center;gap:6px}
-.btn:hover{background:var(--bg4)}
-.btn:active{transform:scale(.98)}
+.btn:hover{background:var(--bg4)}.btn:active{transform:scale(.98)}
 .btn-primary{background:var(--blue);border-color:var(--blue);color:#fff}
 .btn-primary:hover{background:#4a7bf0;border-color:#4a7bf0}
+.btn-google{background:#fff;border-color:#dadce0;color:#3c4043;font-weight:500}
+.btn-google:hover{background:#f8f9fa}
 .btn-danger{background:var(--red-bg);border-color:var(--red-border);color:var(--red)}
 .btn-danger:hover{background:rgba(242,92,92,.18)}
 .btn-sm{padding:5px 10px;font-size:12px}
 .btn-icon{padding:7px;width:32px;height:32px;justify-content:center}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
 
 .metrics-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:24px}
 .metric-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px 20px;position:relative;overflow:hidden}
@@ -183,43 +205,41 @@ tbody tr:hover td{background:var(--bg3)}
 .empty-state{text-align:center;padding:48px 20px;color:var(--text3)}
 .empty-state-icon{font-size:32px;margin-bottom:12px}
 .empty-state p{font-size:14px;margin-bottom:8px;color:var(--text2)}
+.empty-state span{font-size:12px}
 
 ::-webkit-scrollbar{width:6px;height:6px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:3px}
 
-.toast{position:fixed;bottom:24px;right:24px;background:var(--bg4);border:1px solid var(--border2);color:var(--text);padding:12px 18px;border-radius:var(--radius);font-size:13px;z-index:2000;transform:translateY(80px);transition:transform .25s ease;pointer-events:none;box-shadow:0 8px 32px rgba(0,0,0,.4)}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--bg4);border:1px solid var(--border2);color:var(--text);padding:12px 18px;border-radius:var(--radius);font-size:13px;z-index:2000;transform:translateY(80px);transition:transform .25s ease;pointer-events:none;box-shadow:0 8px 32px rgba(0,0,0,.4);max-width:320px}
 .toast.show{transform:translateY(0)}
+
+/* Sync indicator on table rows */
+.sync-pending td{opacity:.6}
+.sync-pending td:first-child::before{content:'⏳ ';font-size:10px}
 
 @media(max-width:900px){
   .metrics-grid{grid-template-columns:repeat(2,1fr)}
   .grid-2{grid-template-columns:1fr}
   .grid-3{grid-template-columns:repeat(2,1fr)}
   .auth-card,.setup-card{padding:28px 20px}
+  .sidebar{width:200px;min-width:200px}
 }
 </style>
 </head>
 <body>
 
-<!-- ═══════════════════════════ AUTH ═══════════════════════════ -->
+<!-- ══════════════════════ AUTH ══════════════════════ -->
 <div id="auth-screen">
   <div class="auth-card">
     <div class="auth-logo">
       <div class="auth-logo-icon">💰</div>
-      <div>
-        <div class="auth-logo-text">FinanzApp</div>
-        <div class="auth-logo-sub">Acceso seguro · 2FA</div>
-      </div>
+      <div><div class="auth-logo-text">FinanzApp</div><div class="auth-logo-sub">Acceso seguro · 2FA</div></div>
     </div>
-
-    <!-- Paso 1: contraseña -->
     <div id="auth-step-1">
-      <div class="auth-steps">
-        <div class="auth-step active"></div>
-        <div class="auth-step"></div>
-      </div>
+      <div class="auth-steps"><div class="auth-step active"></div><div class="auth-step"></div></div>
       <div class="auth-title">Contraseña maestra</div>
-      <div class="auth-sub">Ingresa tu contraseña para continuar al verificador de dos factores.</div>
+      <div class="auth-sub">Ingresa tu contraseña para continuar.</div>
       <div class="auth-error" id="pass-error"></div>
       <div class="auth-field">
         <label>Contraseña</label>
@@ -228,47 +248,38 @@ tbody tr:hover td{background:var(--bg3)}
       <button class="auth-btn" onclick="checkPassword()">Continuar →</button>
       <div class="attempts-info" id="attempts-info"></div>
     </div>
-
-    <!-- Paso 2: TOTP -->
     <div id="auth-step-2" style="display:none">
-      <div class="auth-steps">
-        <div class="auth-step done"></div>
-        <div class="auth-step active"></div>
-      </div>
+      <div class="auth-steps"><div class="auth-step done"></div><div class="auth-step active"></div></div>
       <div class="auth-title">Código de verificación</div>
-      <div class="auth-sub">Abre <strong>Google Authenticator</strong> e ingresa el código de 6 dígitos que aparece.</div>
+      <div class="auth-sub">Ingresa el código de 6 dígitos de <strong>Google Authenticator</strong>.</div>
       <div class="auth-error" id="totp-error"></div>
       <div class="otp-inputs" id="otp-inputs">
-        <input class="otp-digit" maxlength="1" type="text" inputmode="numeric" pattern="[0-9]">
-        <input class="otp-digit" maxlength="1" type="text" inputmode="numeric" pattern="[0-9]">
-        <input class="otp-digit" maxlength="1" type="text" inputmode="numeric" pattern="[0-9]">
-        <input class="otp-digit" maxlength="1" type="text" inputmode="numeric" pattern="[0-9]">
-        <input class="otp-digit" maxlength="1" type="text" inputmode="numeric" pattern="[0-9]">
-        <input class="otp-digit" maxlength="1" type="text" inputmode="numeric" pattern="[0-9]">
+        <input class="otp-digit" maxlength="1" type="text" inputmode="numeric">
+        <input class="otp-digit" maxlength="1" type="text" inputmode="numeric">
+        <input class="otp-digit" maxlength="1" type="text" inputmode="numeric">
+        <input class="otp-digit" maxlength="1" type="text" inputmode="numeric">
+        <input class="otp-digit" maxlength="1" type="text" inputmode="numeric">
+        <input class="otp-digit" maxlength="1" type="text" inputmode="numeric">
       </div>
       <button class="auth-btn" onclick="checkTOTP()">Ingresar →</button>
-      <div style="text-align:center;margin-top:14px">
-        <span style="font-size:12px;color:var(--text3);cursor:pointer" onclick="showAuthStep(1)">← Volver</span>
-      </div>
+      <div style="text-align:center;margin-top:14px"><span style="font-size:12px;color:var(--text3);cursor:pointer" onclick="showAuthStep(1)">← Volver</span></div>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════════════════ SETUP ═══════════════════════════ -->
+<!-- ══════════════════════ SETUP ══════════════════════ -->
 <div id="setup-screen">
   <div class="setup-card">
 
+    <!-- S1: Contraseña -->
     <div class="setup-step active" id="setup-s1">
       <div class="auth-logo" style="margin-bottom:20px">
         <div class="auth-logo-icon">🔐</div>
-        <div>
-          <div class="auth-logo-text">Primer acceso</div>
-          <div class="auth-logo-sub">Configuración de seguridad</div>
-        </div>
+        <div><div class="auth-logo-text">Primer acceso</div><div class="auth-logo-sub">Configuración inicial</div></div>
       </div>
       <div class="step-title">Crea tu contraseña maestra</div>
-      <div class="step-sub">Esta contraseña protegerá el acceso a FinanzApp junto con Google Authenticator.</div>
-      <div class="info-box warn">⚠️ Guarda esta contraseña en un lugar seguro. No existe recuperación si la olvidas.</div>
+      <div class="step-sub">Esta contraseña protegerá el acceso junto con Google Authenticator.</div>
+      <div class="info-box warn">⚠️ Guarda esta contraseña en un lugar seguro. No se puede recuperar.</div>
       <div class="auth-field" style="margin-top:16px">
         <label>Contraseña maestra</label>
         <input type="password" id="setup-pass1" placeholder="Mínimo 8 caracteres">
@@ -281,44 +292,86 @@ tbody tr:hover td{background:var(--bg3)}
       <button class="auth-btn" onclick="setupStep1()">Siguiente → Configurar 2FA</button>
     </div>
 
+    <!-- S2: QR -->
     <div class="setup-step" id="setup-s2">
       <div class="step-title">Configura Google Authenticator</div>
-      <div class="step-sub">Escanea el código QR con la app <strong>Google Authenticator</strong> en tu celular para activar el segundo factor.</div>
+      <div class="step-sub">Escanea el QR con la app en tu celular.</div>
       <div style="text-align:center">
         <div class="qr-wrap" id="qr-container" style="display:block"></div>
         <div style="font-size:12px;color:var(--text2);margin-bottom:6px">¿No puedes escanear? Usa este código manual:</div>
         <div class="secret-box" id="secret-display" onclick="copySecret()" title="Clic para copiar"></div>
-        <div style="font-size:11px;color:var(--text3);margin-top:2px">Clic para copiar al portapapeles</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px">Clic para copiar</div>
       </div>
-      <div class="info-box" style="margin-top:14px">
-        📱 En Google Authenticator: toca <strong>+</strong> → <strong>Escanear código QR</strong>.<br>
-        O usa <strong>Ingresar clave de configuración</strong> con el código de arriba.
-      </div>
+      <div class="info-box" style="margin-top:14px">📱 En Google Authenticator: toca <strong>+</strong> → <strong>Escanear código QR</strong>.</div>
       <button class="auth-btn" style="margin-top:8px" onclick="showSetupStep(3);setTimeout(()=>initOtpInputs('setup-otp-inputs',setupStep3),50)">Ya escaneé el QR →</button>
     </div>
 
+    <!-- S3: Verificar TOTP -->
     <div class="setup-step" id="setup-s3">
       <div class="step-title">Verificar Google Authenticator</div>
-      <div class="step-sub">Ingresa el código de 6 dígitos que aparece ahora en Google Authenticator para confirmar que todo funciona.</div>
+      <div class="step-sub">Ingresa el código de 6 dígitos para confirmar que todo funciona.</div>
       <div class="otp-inputs" id="setup-otp-inputs">
-        <input class="otp-digit" maxlength="1" type="text" inputmode="numeric" pattern="[0-9]">
-        <input class="otp-digit" maxlength="1" type="text" inputmode="numeric" pattern="[0-9]">
-        <input class="otp-digit" maxlength="1" type="text" inputmode="numeric" pattern="[0-9]">
-        <input class="otp-digit" maxlength="1" type="text" inputmode="numeric" pattern="[0-9]">
-        <input class="otp-digit" maxlength="1" type="text" inputmode="numeric" pattern="[0-9]">
-        <input class="otp-digit" maxlength="1" type="text" inputmode="numeric" pattern="[0-9]">
+        <input class="otp-digit" maxlength="1" type="text" inputmode="numeric">
+        <input class="otp-digit" maxlength="1" type="text" inputmode="numeric">
+        <input class="otp-digit" maxlength="1" type="text" inputmode="numeric">
+        <input class="otp-digit" maxlength="1" type="text" inputmode="numeric">
+        <input class="otp-digit" maxlength="1" type="text" inputmode="numeric">
+        <input class="otp-digit" maxlength="1" type="text" inputmode="numeric">
       </div>
       <div class="auth-error" id="setup-totp-error"></div>
       <button class="auth-btn" onclick="setupStep3()">✓ Verificar y entrar</button>
-      <div style="text-align:center;margin-top:12px">
-        <span style="font-size:12px;color:var(--text3);cursor:pointer" onclick="showSetupStep(2)">← Volver al QR</span>
+      <div style="text-align:center;margin-top:12px"><span style="font-size:12px;color:var(--text3);cursor:pointer" onclick="showSetupStep(2)">← Volver al QR</span></div>
+    </div>
+
+    <!-- S4: Google Sheets config -->
+    <div class="setup-step" id="setup-s4">
+      <div class="step-title">Conectar Google Sheets</div>
+      <div class="step-sub">Configura tu Google Cloud Client ID para sincronizar con tu Google Sheets personal. Solo lo haces una vez.</div>
+
+      <div class="gs-step">
+        <div class="gs-num">1</div>
+        <div>
+          <div class="gs-step-title">Ir a Google Cloud Console</div>
+          <div class="gs-step-desc">Abre <a href="https://console.cloud.google.com" target="_blank">console.cloud.google.com</a> → crea un proyecto nuevo (ej: "FinanzApp").</div>
+        </div>
+      </div>
+      <div class="gs-step">
+        <div class="gs-num">2</div>
+        <div>
+          <div class="gs-step-title">Habilitar Google Sheets API</div>
+          <div class="gs-step-desc">En tu proyecto ve a <strong>APIs y servicios → Biblioteca</strong> → busca <strong>Google Sheets API</strong> → Habilitar.<br>Haz lo mismo con <strong>Google Drive API</strong>.</div>
+        </div>
+      </div>
+      <div class="gs-step">
+        <div class="gs-num">3</div>
+        <div>
+          <div class="gs-step-title">Crear credenciales OAuth</div>
+          <div class="gs-step-desc">Ve a <strong>APIs → Credenciales → Crear credencial → ID de cliente OAuth 2.0</strong>.<br>Tipo: <code>Aplicación web</code>.<br>En "Orígenes autorizados" agrega la URL donde usas la app (ej: <code>https://tuusuario.github.io</code> o <code>http://localhost</code>).</div>
+        </div>
+      </div>
+      <div class="gs-step">
+        <div class="gs-num">4</div>
+        <div>
+          <div class="gs-step-title">Pegar el Client ID abajo</div>
+          <div class="gs-step-desc">Copia el <strong>Client ID</strong> generado (termina en <code>.apps.googleusercontent.com</code>) y pégalo aquí.</div>
+        </div>
+      </div>
+
+      <div class="auth-field" style="margin-top:14px">
+        <label>Google OAuth Client ID</label>
+        <input type="text" id="setup-client-id" placeholder="xxxxxxxxxx.apps.googleusercontent.com">
+      </div>
+      <div class="auth-error" id="setup-sheets-error"></div>
+      <button class="auth-btn" onclick="setupStep4()">Guardar y conectar con Google →</button>
+      <div style="text-align:center;margin-top:10px">
+        <span style="font-size:12px;color:var(--text3);cursor:pointer" onclick="skipSheetsSetup()">Omitir por ahora (usar solo localStorage)</span>
       </div>
     </div>
 
   </div>
 </div>
 
-<!-- ═══════════════════════════ APP ═══════════════════════════ -->
+<!-- ══════════════════════ APP ══════════════════════ -->
 <div class="app" id="main-app" style="display:none">
   <aside class="sidebar">
     <div class="sidebar-logo">
@@ -328,9 +381,14 @@ tbody tr:hover td{background:var(--bg3)}
       </div>
     </div>
     <nav class="sidebar-nav">
-      <div class="session-info">
-        <span class="session-dot"></span>Sesión activa · 2FA
+      <div class="session-info"><span class="session-dot"></span>Sesión activa · 2FA</div>
+
+      <!-- Google Sheets status -->
+      <div class="sheets-status disconnected" id="sheets-status-bar" onclick="handleSheetsClick()">
+        <span class="status-dot"></span>
+        <span id="sheets-status-text">Google Sheets: desconectado</span>
       </div>
+
       <div class="nav-section-label">Principal</div>
       <div class="nav-item active" onclick="goTo('dashboard')" id="nav-dashboard">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
@@ -346,13 +404,17 @@ tbody tr:hover td{background:var(--bg3)}
         Bancos<span class="nav-badge" id="badge-banks">0</span>
       </div>
       <div class="nav-section-label" style="margin-top:8px">Datos</div>
+      <div class="nav-item" onclick="syncNow()" id="nav-sync">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+        Sincronizar ahora
+      </div>
       <div class="nav-item" onclick="exportData()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Exportar backup
+        Backup JSON
       </div>
       <div class="nav-item" onclick="document.getElementById('import-input').click()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17,8 12,3 7,8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-        Importar backup
+        Restaurar backup
       </div>
       <input type="file" id="import-input" accept=".json" style="display:none" onchange="importData(event)">
       <div class="nav-section-label" style="margin-top:8px">Seguridad</div>
@@ -361,14 +423,22 @@ tbody tr:hover td{background:var(--bg3)}
         Bloquear sesión
       </div>
     </nav>
-    <div class="sidebar-footer">v2.0 &nbsp;·&nbsp; <span style="color:var(--green)">🔒 2FA activo</span></div>
+    <div class="sidebar-footer">
+      <div style="margin-bottom:4px">FinanzApp v2.1 · <span style="color:var(--green)">🔒 2FA</span></div>
+      <div id="last-sync-label" style="color:var(--text3);font-size:10px"></div>
+    </div>
   </aside>
 
   <main class="main">
+    <!-- DASHBOARD -->
     <div class="page active" id="page-dashboard">
       <div class="topbar">
         <div><div class="page-title">Dashboard</div><div class="page-sub">Resumen general de tus finanzas</div></div>
         <div class="topbar-actions">
+          <button class="btn" id="btn-sheets-open" onclick="openSheet()" style="display:none">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15,3 21,3 21,9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            Ver en Sheets
+          </button>
           <button class="btn" onclick="renderDashboard()">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
             Actualizar
@@ -396,6 +466,7 @@ tbody tr:hover td{background:var(--bg3)}
       </div>
     </div>
 
+    <!-- MOVIMIENTOS -->
     <div class="page" id="page-movimientos">
       <div class="topbar">
         <div><div class="page-title">Movimientos</div><div class="page-sub">Registra y gestiona tus ingresos y egresos</div></div>
@@ -411,6 +482,7 @@ tbody tr:hover td{background:var(--bg3)}
       <div class="card" style="padding:0"><div class="table-wrap" id="mov-table-wrap"></div></div>
     </div>
 
+    <!-- BANCOS -->
     <div class="page" id="page-bancos">
       <div class="topbar">
         <div><div class="page-title">Bancos</div><div class="page-sub">Administra tus cuentas bancarias</div></div>
@@ -421,7 +493,7 @@ tbody tr:hover td{background:var(--bg3)}
   </main>
 </div>
 
-<!-- MODALES -->
+<!-- MODALES APP -->
 <div class="overlay" id="modal-mov" onclick="if(event.target===this)closeModal('modal-mov')">
   <div class="modal">
     <div class="modal-title" id="mov-modal-title">Nuevo movimiento</div>
@@ -459,110 +531,261 @@ tbody tr:hover td{background:var(--bg3)}
   </div>
 </div>
 
+<!-- Modal: conectar Sheets desde app -->
+<div class="overlay" id="modal-sheets" onclick="if(event.target===this)closeModal('modal-sheets')">
+  <div class="modal" style="width:520px">
+    <div class="modal-title">🔗 Conectar Google Sheets</div>
+    <div class="info-box" style="margin-bottom:16px">Ingresa tu Google OAuth Client ID para activar la sincronización bidireccional con tu cuenta de Google.</div>
+    <div class="field"><label>Google OAuth Client ID</label><input type="text" id="modal-client-id" placeholder="xxxxxxxxxx.apps.googleusercontent.com"></div>
+    <div class="auth-error" id="sheets-modal-error"></div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal('modal-sheets')">Cancelar</button>
+      <button class="btn btn-primary" onclick="connectSheets()">Conectar con Google →</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
+<!-- Google Identity Services -->
+<script src="https://accounts.google.com/gsi/client" async></script>
+
 <script>
+'use strict';
 // ══════════════════════════════════════════════
-//  TOTP ENGINE — RFC 6238 (Google Authenticator)
+//  TOTP ENGINE — RFC 6238
 // ══════════════════════════════════════════════
 const TOTP={
-  generateSecret(){
-    const b=new Uint8Array(20);crypto.getRandomValues(b);
-    const a='ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';let s='';
-    for(let i=0;i<20;i+=5){
-      s+=a[b[i]>>3]+a[((b[i]&7)<<2)|(b[i+1]>>6)]+a[(b[i+1]>>1)&31]+
-         a[((b[i+1]&1)<<4)|(b[i+2]>>4)]+a[((b[i+2]&15)<<1)|(b[i+3]>>7)]+
-         a[(b[i+3]>>2)&31]+a[((b[i+3]&3)<<3)|(b[i+4]>>5)]+a[b[i+4]&31];
-    }return s;
-  },
-  base32Decode(s){
-    const a='ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
-    s=s.replace(/=+$/,'').toUpperCase();let bits=0,val=0;const out=[];
-    for(const c of s){val=(val<<5)|a.indexOf(c);bits+=5;if(bits>=8){bits-=8;out.push((val>>bits)&255);}}
-    return new Uint8Array(out);
-  },
-  async hmac(key,data){
-    const k=await crypto.subtle.importKey('raw',key,{name:'HMAC',hash:'SHA-1'},false,['sign']);
-    return new Uint8Array(await crypto.subtle.sign('HMAC',k,data));
-  },
-  async generate(secret,time){
-    const T=Math.floor((time||Date.now())/1000/30);
-    const buf=new ArrayBuffer(8);new DataView(buf).setUint32(4,T,false);
-    const h=await this.hmac(this.base32Decode(secret),new Uint8Array(buf));
-    const off=h[19]&0xf;
-    const code=((h[off]&0x7f)<<24|(h[off+1]&0xff)<<16|(h[off+2]&0xff)<<8|(h[off+3]&0xff))%1000000;
-    return String(code).padStart(6,'0');
-  },
-  async verify(secret,token){
-    for(const d of[-30000,0,30000])if(await this.generate(secret,Date.now()+d)===token)return true;
+  generateSecret(){const b=new Uint8Array(20);crypto.getRandomValues(b);const a='ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';let s='';for(let i=0;i<20;i+=5){s+=a[b[i]>>3]+a[((b[i]&7)<<2)|(b[i+1]>>6)]+a[(b[i+1]>>1)&31]+a[((b[i+1]&1)<<4)|(b[i+2]>>4)]+a[((b[i+2]&15)<<1)|(b[i+3]>>7)]+a[(b[i+3]>>2)&31]+a[((b[i+3]&3)<<3)|(b[i+4]>>5)]+a[b[i+4]&31];}return s;},
+  base32Decode(s){const a='ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';s=s.replace(/=+$/,'').toUpperCase();let bits=0,val=0;const out=[];for(const c of s){val=(val<<5)|a.indexOf(c);bits+=5;if(bits>=8){bits-=8;out.push((val>>bits)&255);}}return new Uint8Array(out);},
+  async hmac(key,data){const k=await crypto.subtle.importKey('raw',key,{name:'HMAC',hash:'SHA-1'},false,['sign']);return new Uint8Array(await crypto.subtle.sign('HMAC',k,data));},
+  async generate(secret,time){const T=Math.floor((time||Date.now())/1000/30);const buf=new ArrayBuffer(8);new DataView(buf).setUint32(4,T,false);const h=await this.hmac(this.base32Decode(secret),new Uint8Array(buf));const off=h[19]&0xf;const code=((h[off]&0x7f)<<24|(h[off+1]&0xff)<<16|(h[off+2]&0xff)<<8|(h[off+3]&0xff))%1000000;return String(code).padStart(6,'0');},
+  async verify(secret,token){for(const d of[-30000,0,30000])if(await this.generate(secret,Date.now()+d)===token)return true;return false;}
+};
+
+async function hashPwd(p){const e=new TextEncoder().encode(p);const b=await crypto.subtle.digest('SHA-256',e);return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('');}
+
+// ══════════════════════════════════════════════
+//  GOOGLE SHEETS API
+// ══════════════════════════════════════════════
+const GS = {
+  token: null,
+  sheetId: null,
+  clientId: null,
+  SCOPES: 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file',
+  SHEET_NAME: 'FinanzApp — Mis Finanzas',
+
+  init(clientId) {
+    this.clientId = clientId;
+    this.sheetId = localStorage.getItem('fapp_sheet_id') || null;
+    const saved = localStorage.getItem('fapp_gs_token');
+    if (saved) {
+      const t = JSON.parse(saved);
+      if (t.expires > Date.now()) { this.token = t.access_token; return true; }
+    }
     return false;
+  },
+
+  signIn() {
+    return new Promise((resolve, reject) => {
+      const client = google.accounts.oauth2.initTokenClient({
+        client_id: this.clientId,
+        scope: this.SCOPES,
+        callback: (resp) => {
+          if (resp.error) { reject(resp.error); return; }
+          this.token = resp.access_token;
+          localStorage.setItem('fapp_gs_token', JSON.stringify({
+            access_token: resp.access_token,
+            expires: Date.now() + (resp.expires_in - 60) * 1000
+          }));
+          resolve(resp.access_token);
+        }
+      });
+      client.requestAccessToken();
+    });
+  },
+
+  async api(method, url, body) {
+    const resp = await fetch('https://sheets.googleapis.com' + url, {
+      method,
+      headers: { 'Authorization': 'Bearer ' + this.token, 'Content-Type': 'application/json' },
+      body: body ? JSON.stringify(body) : undefined
+    });
+    if (!resp.ok) {
+      const err = await resp.json();
+      throw new Error(err.error?.message || 'API error');
+    }
+    return resp.status === 204 ? null : resp.json();
+  },
+
+  async driveApi(method, url, body) {
+    const resp = await fetch('https://www.googleapis.com/drive/v3' + url, {
+      method,
+      headers: { 'Authorization': 'Bearer ' + this.token, 'Content-Type': 'application/json' },
+      body: body ? JSON.stringify(body) : undefined
+    });
+    if (!resp.ok) throw new Error('Drive API error');
+    return resp.json();
+  },
+
+  async findOrCreateSheet() {
+    if (this.sheetId) {
+      // Verify it still exists
+      try {
+        await this.api('GET', `/v4/spreadsheets/${this.sheetId}?fields=spreadsheetId`);
+        return this.sheetId;
+      } catch(e) { this.sheetId = null; localStorage.removeItem('fapp_sheet_id'); }
+    }
+    // Search existing
+    const search = await fetch(
+      `https://www.googleapis.com/drive/v3/files?q=name='${this.SHEET_NAME}' and mimeType='application/vnd.google-apps.spreadsheet' and trashed=false&fields=files(id,name)`,
+      { headers: { 'Authorization': 'Bearer ' + this.token } }
+    ).then(r => r.json());
+
+    if (search.files && search.files.length > 0) {
+      this.sheetId = search.files[0].id;
+    } else {
+      // Create new spreadsheet
+      const created = await this.api('POST', '/v4/spreadsheets', {
+        properties: { title: this.SHEET_NAME },
+        sheets: [
+          { properties: { title: 'Movimientos', sheetId: 0 } },
+          { properties: { title: 'Bancos', sheetId: 1 } },
+          { properties: { title: 'Resumen', sheetId: 2 } }
+        ]
+      });
+      this.sheetId = created.spreadsheetId;
+      await this.initHeaders();
+    }
+    localStorage.setItem('fapp_sheet_id', this.sheetId);
+    return this.sheetId;
+  },
+
+  async initHeaders() {
+    await this.api('PUT', `/v4/spreadsheets/${this.sheetId}/values/Movimientos!A1:G1?valueInputOption=USER_ENTERED`, {
+      values: [['ID','Fecha','Descripción','Tipo','Monto','Banco','Categoría']]
+    });
+    await this.api('PUT', `/v4/spreadsheets/${this.sheetId}/values/Bancos!A1:D1?valueInputOption=USER_ENTERED`, {
+      values: [['ID','Nombre','Número de cuenta','Color']]
+    });
+    await this.api('PUT', `/v4/spreadsheets/${this.sheetId}/values/Resumen!A1:B1?valueInputOption=USER_ENTERED`, {
+      values: [['Concepto','Valor']]
+    });
+    // Style headers
+    await this.api('POST', `/v4/spreadsheets/${this.sheetId}:batchUpdate`, {
+      requests: [0,1,2].flatMap(sid => ([{
+        repeatCell: {
+          range: { sheetId: sid, startRowIndex: 0, endRowIndex: 1 },
+          cell: { userEnteredFormat: { backgroundColor: { red:.22, green:.36, blue:.98 }, textFormat: { bold:true, foregroundColor:{ red:1, green:1, blue:1 } } } },
+          fields: 'userEnteredFormat(backgroundColor,textFormat)'
+        }
+      }]))
+    });
+  },
+
+  // ── WRITE ALL DATA ──────────────────────────────
+  async writeAll(state) {
+    await this.findOrCreateSheet();
+    const banks = state.banks;
+    const movRows = [['ID','Fecha','Descripción','Tipo','Monto','Banco','Categoría'],
+      ...state.movs.map(m => [m.id, m.date, m.desc, m.type, m.amount, (banks.find(b=>b.id==m.bankId)||{name:'—'}).name, m.cat||''])
+    ];
+    const bankRows = [['ID','Nombre','Número de cuenta','Color'],
+      ...banks.map(b => [b.id, b.name, b.number||'', b.color])
+    ];
+    const ing = state.movs.filter(m=>m.type==='ingreso').reduce((s,m)=>s+m.amount,0);
+    const egr = state.movs.filter(m=>m.type==='egreso').reduce((s,m)=>s+m.amount,0);
+    const resumeRows = [
+      ['Concepto','Valor'],
+      ['Total Ingresos', ing],
+      ['Total Egresos', egr],
+      ['Balance Neto', ing-egr],
+      ['Última sincronización', new Date().toLocaleString('es-PE')],
+      ['Total movimientos', state.movs.length],
+      ['Total bancos', banks.length],
+    ];
+    await Promise.all([
+      this.api('PUT', `/v4/spreadsheets/${this.sheetId}/values/Movimientos!A1:G${movRows.length}?valueInputOption=USER_ENTERED`, { values: movRows }),
+      this.api('PUT', `/v4/spreadsheets/${this.sheetId}/values/Bancos!A1:D${bankRows.length}?valueInputOption=USER_ENTERED`, { values: bankRows }),
+      this.api('PUT', `/v4/spreadsheets/${this.sheetId}/values/Resumen!A1:B${resumeRows.length}?valueInputOption=USER_ENTERED`, { values: resumeRows }),
+    ]);
+    // Clear old rows beyond current data
+    await this.clearBeyond('Movimientos', movRows.length, 7);
+    await this.clearBeyond('Bancos', bankRows.length, 4);
+  },
+
+  async clearBeyond(sheet, fromRow, cols) {
+    try {
+      const colLetter = String.fromCharCode(64 + cols);
+      await this.api('PUT', `/v4/spreadsheets/${this.sheetId}/values/${sheet}!A${fromRow+1}:${colLetter}1000?valueInputOption=USER_ENTERED`, { values: [] });
+    } catch(e) {}
+  },
+
+  // ── READ ALL DATA ───────────────────────────────
+  async readAll() {
+    await this.findOrCreateSheet();
+    const [movResp, bankResp] = await Promise.all([
+      this.api('GET', `/v4/spreadsheets/${this.sheetId}/values/Movimientos!A2:G1000`),
+      this.api('GET', `/v4/spreadsheets/${this.sheetId}/values/Bancos!A2:D1000`)
+    ]);
+    const banks = (bankResp.values||[]).filter(r=>r[0]).map(r => ({
+      id: parseInt(r[0]), name: r[1]||'', number: r[2]||'', color: r[3]||'#5b8cfa'
+    }));
+    const movs = (movResp.values||[]).filter(r=>r[0]).map(r => {
+      const bankName = r[5]||'';
+      const bank = banks.find(b=>b.name===bankName) || banks[0];
+      return { id: parseInt(r[0]), date: r[1]||'', desc: r[2]||'', type: r[3]||'ingreso',
+               amount: parseFloat(r[4])||0, bankId: bank?.id||1, cat: r[6]||'' };
+    });
+    return { banks, movs };
+  },
+
+  getSheetUrl() {
+    return this.sheetId ? `https://docs.google.com/spreadsheets/d/${this.sheetId}/edit` : null;
   }
 };
 
-async function hashPwd(p){
-  const e=new TextEncoder().encode(p);
-  const b=await crypto.subtle.digest('SHA-256',e);
-  return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('');
-}
-
 // ══════════════════════════════════════════════
-//  AUTH STATE & HELPERS
+//  AUTH STATE
 // ══════════════════════════════════════════════
-let authSt={attempts:0,lockedUntil:0};
-const MAX_AT=5,LOCK_MS=5*60*1000;
+let authSt = { attempts:0, lockedUntil:0 };
+const MAX_AT=5, LOCK_MS=5*60*1000;
 
 function getSecCfg(){try{return JSON.parse(localStorage.getItem('fapp_sec')||'null');}catch{return null;}}
 function saveSecCfg(c){localStorage.setItem('fapp_sec',JSON.stringify(c));}
 
-function showAuthErr(id,msg){const e=document.getElementById(id);e.textContent=msg;e.classList.add('show');}
-function hideAuthErr(id){document.getElementById(id).classList.remove('show');}
+function showAuthErr(id,msg){const e=document.getElementById(id);if(e){e.textContent=msg;e.classList.add('show');}}
+function hideAuthErr(id){const e=document.getElementById(id);if(e)e.classList.remove('show');}
 
 function showAuthStep(n){
   document.getElementById('auth-step-1').style.display=n===1?'block':'none';
   document.getElementById('auth-step-2').style.display=n===2?'block':'none';
   if(n===2)setTimeout(()=>initOtpInputs('otp-inputs',checkTOTP),50);
-  if(n===1){hideAuthErr('pass-error');hideAuthErr('totp-error');document.getElementById('auth-pass').value='';}
+  if(n===1){hideAuthErr('pass-error');document.getElementById('auth-pass').value='';}
 }
 
 async function checkPassword(){
   const now=Date.now();
-  if(authSt.lockedUntil>now){
-    const s=Math.ceil((authSt.lockedUntil-now)/1000);
-    showAuthErr('pass-error',`🔒 Bloqueado. Espera ${s} segundos.`);return;
-  }
+  if(authSt.lockedUntil>now){showAuthErr('pass-error',`🔒 Bloqueado. Espera ${Math.ceil((authSt.lockedUntil-now)/1000)}s.`);return;}
   const pass=document.getElementById('auth-pass').value;
   if(!pass){showAuthErr('pass-error','Ingresa tu contraseña.');return;}
-  const cfg=getSecCfg();
   const hash=await hashPwd(pass);
+  const cfg=getSecCfg();
   if(hash!==cfg.passHash){
     authSt.attempts++;
     const left=MAX_AT-authSt.attempts;
-    if(authSt.attempts>=MAX_AT){
-      authSt.lockedUntil=now+LOCK_MS;authSt.attempts=0;
-      showAuthErr('pass-error','🔒 Demasiados intentos. Bloqueado 5 minutos.');
-    }else{
-      showAuthErr('pass-error',`Contraseña incorrecta. ${left} intento(s) restante(s).`);
-      document.getElementById('attempts-info').innerHTML=`Intentos: <span>${authSt.attempts}/${MAX_AT}</span>`;
-    }
-    const inp=document.getElementById('auth-pass');
-    inp.classList.add('shake');setTimeout(()=>inp.classList.remove('shake'),400);
-    inp.value='';return;
+    if(authSt.attempts>=MAX_AT){authSt.lockedUntil=now+LOCK_MS;authSt.attempts=0;showAuthErr('pass-error','🔒 Demasiados intentos. Bloqueado 5 minutos.');}
+    else{showAuthErr('pass-error',`Contraseña incorrecta. ${left} intento(s) restante(s).`);document.getElementById('attempts-info').innerHTML=`Intentos: <span>${authSt.attempts}/${MAX_AT}</span>`;}
+    const inp=document.getElementById('auth-pass');inp.classList.add('shake');setTimeout(()=>inp.classList.remove('shake'),400);inp.value='';return;
   }
-  authSt.attempts=0;
-  document.getElementById('attempts-info').textContent='';
-  hideAuthErr('pass-error');
-  showAuthStep(2);
+  authSt.attempts=0;document.getElementById('attempts-info').textContent='';hideAuthErr('pass-error');showAuthStep(2);
 }
 
 async function checkTOTP(){
   const code=getOtpVal('otp-inputs');
-  if(code.length<6){showAuthErr('totp-error','Ingresa los 6 dígitos completos.');return;}
-  const cfg=getSecCfg();
-  const ok=await TOTP.verify(cfg.totpSecret,code);
-  if(!ok){
-    showAuthErr('totp-error','Código incorrecto o expirado. Revisa la app e intenta de nuevo.');
-    clearOtpInputs('otp-inputs');return;
-  }
+  if(code.length<6){showAuthErr('totp-error','Ingresa los 6 dígitos.');return;}
+  const ok=await TOTP.verify(getSecCfg().totpSecret,code);
+  if(!ok){showAuthErr('totp-error','Código incorrecto o expirado.');clearOtpInputs('otp-inputs');return;}
   hideAuthErr('totp-error');
   enterApp();
 }
@@ -572,9 +795,19 @@ function enterApp(){
   document.getElementById('setup-screen').classList.remove('show');
   document.getElementById('main-app').style.display='flex';
   updateBadges();renderDashboard();
+  // Auto-connect Google Sheets if configured
+  const cfg=getSecCfg();
+  if(cfg?.clientId){
+    const ok=GS.init(cfg.clientId);
+    if(ok){connectSheetsAuto();}
+    else{updateSheetsStatus('disconnected','Google Sheets: clic para conectar');}
+  }else{
+    updateSheetsStatus('disconnected','Google Sheets: no configurado');
+  }
 }
 
 function lockApp(){
+  GS.token=null;
   document.getElementById('main-app').style.display='none';
   document.getElementById('auth-screen').style.display='flex';
   showAuthStep(1);
@@ -586,79 +819,173 @@ function lockApp(){
 // ══════════════════════════════════════════════
 let _setupSecret='',_setupHash='';
 
-function showSetupStep(n){
-  document.querySelectorAll('.setup-step').forEach(s=>s.classList.remove('active'));
-  document.getElementById('setup-s'+n).classList.add('active');
-}
+function showSetupStep(n){document.querySelectorAll('.setup-step').forEach(s=>s.classList.remove('active'));document.getElementById('setup-s'+n).classList.add('active');}
 
 async function setupStep1(){
   const p1=document.getElementById('setup-pass1').value;
   const p2=document.getElementById('setup-pass2').value;
-  const err=document.getElementById('setup-pass-error');
-  err.classList.remove('show');
-  if(p1.length<8){err.textContent='La contraseña debe tener al menos 8 caracteres.';err.classList.add('show');return;}
-  if(p1!==p2){err.textContent='Las contraseñas no coinciden.';err.classList.add('show');return;}
+  hideAuthErr('setup-pass-error');
+  if(p1.length<8){showAuthErr('setup-pass-error','Mínimo 8 caracteres.');return;}
+  if(p1!==p2){showAuthErr('setup-pass-error','Las contraseñas no coinciden.');return;}
   _setupHash=await hashPwd(p1);
   _setupSecret=TOTP.generateSecret();
-  // Generar QR
   const uri=`otpauth://totp/FinanzApp:usuario?secret=${_setupSecret}&issuer=FinanzApp&algorithm=SHA1&digits=6&period=30`;
   document.getElementById('secret-display').textContent=_setupSecret;
-  const qrDiv=document.getElementById('qr-container');
-  qrDiv.innerHTML='';
-  try{
-    const canvas=document.createElement('canvas');
-    qrDiv.appendChild(canvas);
-    QRCode.toCanvas(canvas,uri,{width:200,margin:1,color:{dark:'#000',light:'#fff'}});
-  }catch(e){
-    qrDiv.innerHTML=`<div style="padding:16px;font-size:12px;color:#333;text-align:center">Error generando QR.<br>Usa el código manual.</div>`;
-  }
+  const qrDiv=document.getElementById('qr-container');qrDiv.innerHTML='';
+  try{const c=document.createElement('canvas');qrDiv.appendChild(c);QRCode.toCanvas(c,uri,{width:200,margin:1,color:{dark:'#000',light:'#fff'}});}
+  catch(e){qrDiv.innerHTML=`<div style="padding:16px;font-size:12px;color:#333;text-align:center">Usa el código manual.</div>`;}
   showSetupStep(2);
 }
 
-function copySecret(){
-  navigator.clipboard?.writeText(_setupSecret).then(()=>showToast('📋 Clave copiada'));
-}
+function copySecret(){navigator.clipboard?.writeText(_setupSecret).then(()=>showToast('📋 Clave copiada'));}
 
 async function setupStep3(){
   const code=getOtpVal('setup-otp-inputs');
-  const err=document.getElementById('setup-totp-error');
-  err.classList.remove('show');
-  if(code.length<6){err.textContent='Ingresa los 6 dígitos del código.';err.classList.add('show');return;}
+  hideAuthErr('setup-totp-error');
+  if(code.length<6){showAuthErr('setup-totp-error','Ingresa los 6 dígitos.');return;}
   const ok=await TOTP.verify(_setupSecret,code);
-  if(!ok){
-    err.textContent='Código incorrecto. Verifica que escaneaste bien el QR y el código no expiró.';
-    err.classList.add('show');clearOtpInputs('setup-otp-inputs');return;
-  }
-  saveSecCfg({passHash:_setupHash,totpSecret:_setupSecret});
+  if(!ok){showAuthErr('setup-totp-error','Código incorrecto. Intenta de nuevo.');clearOtpInputs('setup-otp-inputs');return;}
+  // Save partial config, go to Sheets setup
+  saveSecCfg({passHash:_setupHash,totpSecret:_setupSecret,clientId:null});
+  showSetupStep(4);
+}
+
+async function setupStep4(){
+  const cid=document.getElementById('setup-client-id').value.trim();
+  hideAuthErr('setup-sheets-error');
+  if(!cid||!cid.includes('.apps.googleusercontent.com')){showAuthErr('setup-sheets-error','Ingresa un Client ID válido.');return;}
+  const cfg=getSecCfg();
+  cfg.clientId=cid;
+  saveSecCfg(cfg);
+  _setupHash='';_setupSecret='';
+  document.getElementById('setup-screen').classList.remove('show');
+  enterApp();
+}
+
+function skipSheetsSetup(){
   _setupHash='';_setupSecret='';
   document.getElementById('setup-screen').classList.remove('show');
   enterApp();
 }
 
 // ══════════════════════════════════════════════
-//  OTP INPUT HELPERS
+//  GOOGLE SHEETS SYNC
+// ══════════════════════════════════════════════
+function updateSheetsStatus(type, text){
+  const bar=document.getElementById('sheets-status-bar');
+  bar.className='sheets-status '+type;
+  document.getElementById('sheets-status-text').textContent=text;
+  const sheetBtn=document.getElementById('btn-sheets-open');
+  if(sheetBtn)sheetBtn.style.display=(type==='connected')?'flex':'none';
+}
+
+async function connectSheetsAuto(){
+  updateSheetsStatus('syncing','Conectando con Google...');
+  try{
+    await GS.signIn();
+    await GS.findOrCreateSheet();
+    updateSheetsStatus('connected','Google Sheets: conectado');
+    await pullFromSheets();
+  }catch(e){
+    updateSheetsStatus('disconnected','Google Sheets: clic para conectar');
+  }
+}
+
+function handleSheetsClick(){
+  const cfg=getSecCfg();
+  if(!cfg?.clientId){openModal('modal-sheets');return;}
+  if(!GS.token){
+    GS.init(cfg.clientId);
+    connectSheetsAuto();
+  }else{
+    openSheet();
+  }
+}
+
+async function connectSheets(){
+  const cid=document.getElementById('modal-client-id').value.trim();
+  hideAuthErr('sheets-modal-error');
+  if(!cid||!cid.includes('.apps.googleusercontent.com')){showAuthErr('sheets-modal-error','Client ID inválido.');return;}
+  const cfg=getSecCfg();cfg.clientId=cid;saveSecCfg(cfg);
+  GS.init(cid);
+  closeModal('modal-sheets');
+  await connectSheetsAuto();
+}
+
+function openSheet(){
+  const url=GS.getSheetUrl();
+  if(url)window.open(url,'_blank');
+}
+
+async function pullFromSheets(){
+  if(!GS.token)return;
+  updateSheetsStatus('syncing','Leyendo Google Sheets...');
+  try{
+    const data=await GS.readAll();
+    if(data.banks.length>0||data.movs.length>0){
+      state.banks=data.banks;state.movs=data.movs;saveFin();
+      updateBadges();renderDashboard();
+    }
+    updateSheetsStatus('connected','Google Sheets: sincronizado');
+    updateLastSync();
+  }catch(e){
+    updateSheetsStatus('error','Error al leer Sheets');
+    showToast('❌ Error al leer Google Sheets: '+e.message);
+  }
+}
+
+async function pushToSheets(){
+  if(!GS.token)return;
+  updateSheetsStatus('syncing','Guardando en Sheets...');
+  try{
+    await GS.writeAll(state);
+    updateSheetsStatus('connected','Google Sheets: sincronizado');
+    updateLastSync();
+  }catch(e){
+    updateSheetsStatus('error','Error al guardar en Sheets');
+    showToast('❌ Error al guardar en Sheets: '+e.message);
+  }
+}
+
+async function syncNow(){
+  if(!GS.token){
+    const cfg=getSecCfg();
+    if(!cfg?.clientId){showToast('⚠️ Configura Google Sheets primero');openModal('modal-sheets');return;}
+    GS.init(cfg.clientId);
+    await connectSheetsAuto();return;
+  }
+  updateSheetsStatus('syncing','Sincronizando...');
+  try{
+    // Pull first, then push (merge strategy: Sheets wins on conflict)
+    await pullFromSheets();
+    await pushToSheets();
+    showToast('✅ Sincronización completa con Google Sheets');
+  }catch(e){showToast('❌ Error de sincronización: '+e.message);}
+}
+
+function updateLastSync(){
+  const el=document.getElementById('last-sync-label');
+  if(el)el.textContent='Sync: '+new Date().toLocaleTimeString('es-PE',{hour:'2-digit',minute:'2-digit'});
+  localStorage.setItem('fapp_last_sync',new Date().toISOString());
+}
+
+// Auto-sync after every save
+async function autoSync(){
+  if(GS.token){
+    await pushToSheets();
+  }
+}
+
+// ══════════════════════════════════════════════
+//  OTP HELPERS
 // ══════════════════════════════════════════════
 function initOtpInputs(cid,onDone){
   const inputs=[...document.querySelectorAll(`#${cid} .otp-digit`)];
   inputs.forEach((inp,i)=>{
     inp.value='';inp.classList.remove('filled');
-    inp.oninput=(e)=>{
-      const v=e.target.value.replace(/\D/g,'').slice(-1);
-      e.target.value=v;e.target.classList.toggle('filled',!!v);
-      if(v&&i<inputs.length-1)inputs[i+1].focus();
-      if(getOtpVal(cid).length===6&&onDone)onDone();
-    };
-    inp.onkeydown=(e)=>{
-      if(e.key==='Backspace'&&!inp.value&&i>0)inputs[i-1].focus();
-      if(e.key==='Enter'&&onDone)onDone();
-    };
-    inp.onpaste=(e)=>{
-      const p=(e.clipboardData||window.clipboardData).getData('text').replace(/\D/g,'').slice(0,6);
-      inputs.forEach((x,j)=>{x.value=p[j]||'';x.classList.toggle('filled',!!x.value);});
-      inputs[Math.min(p.length,5)].focus();
-      if(p.length===6&&onDone)setTimeout(onDone,50);
-      e.preventDefault();
-    };
+    inp.oninput=(e)=>{const v=e.target.value.replace(/\D/g,'').slice(-1);e.target.value=v;e.target.classList.toggle('filled',!!v);if(v&&i<inputs.length-1)inputs[i+1].focus();if(getOtpVal(cid).length===6&&onDone)onDone();};
+    inp.onkeydown=(e)=>{if(e.key==='Backspace'&&!inp.value&&i>0)inputs[i-1].focus();if(e.key==='Enter'&&onDone)onDone();};
+    inp.onpaste=(e)=>{const p=(e.clipboardData||window.clipboardData).getData('text').replace(/\D/g,'').slice(0,6);inputs.forEach((x,j)=>{x.value=p[j]||'';x.classList.toggle('filled',!!x.value);});inputs[Math.min(p.length,5)].focus();if(p.length===6&&onDone)setTimeout(onDone,50);e.preventDefault();};
   });
   inputs[0].focus();
 }
@@ -670,13 +997,11 @@ function clearOtpInputs(cid){document.querySelectorAll(`#${cid} .otp-digit`).for
 // ══════════════════════════════════════════════
 (function boot(){
   const cfg=getSecCfg();
-  if(!cfg){
-    document.getElementById('auth-screen').style.display='none';
-    document.getElementById('setup-screen').classList.add('show');
-  }else{
-    document.getElementById('auth-screen').style.display='flex';
-    showAuthStep(1);
-  }
+  if(!cfg){document.getElementById('auth-screen').style.display='none';document.getElementById('setup-screen').classList.add('show');}
+  else{document.getElementById('auth-screen').style.display='flex';showAuthStep(1);}
+  // Show last sync time in footer even before login
+  const ls=localStorage.getItem('fapp_last_sync');
+  if(ls){const el=document.getElementById('last-sync-label');if(el)el.textContent='Último sync: '+new Date(ls).toLocaleTimeString('es-PE',{hour:'2-digit',minute:'2-digit'});}
 })();
 
 // ══════════════════════════════════════════════
@@ -717,7 +1042,7 @@ function bankById(id){return state.banks.find(b=>b.id==id)||{name:'—',color:'#
 function nextId(arr){return arr.length?Math.max(...arr.map(x=>x.id))+1:1;}
 function bankBalance(id){return state.movs.filter(m=>m.bankId==id).reduce((s,m)=>s+(m.type==='ingreso'?m.amount:-m.amount),0);}
 function updateBadges(){document.getElementById('badge-movs').textContent=state.movs.length;document.getElementById('badge-banks').textContent=state.banks.length;}
-function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+function showToast(msg,dur=2800){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),dur);}
 
 function goTo(page){
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
@@ -741,7 +1066,7 @@ function renderDashboard(){
     <div class="metric-card mc-amber"><div class="metric-label">En bancos</div><div class="metric-value amber">${fmt(total)}</div><div class="metric-trend">${state.banks.length} cuenta(s)</div></div>`;
   renderBarChart();renderDoughnut();
   const rec=[...state.movs].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,8);
-  document.getElementById('dash-recent').innerHTML=rec.length?buildMovTable(rec,false):`<div class="empty-state"><div class="empty-state-icon">📋</div><p>Sin movimientos aún</p></div>`;
+  document.getElementById('dash-recent').innerHTML=rec.length?buildMovTable(rec,false):`<div class="empty-state"><div class="empty-state-icon">📋</div><p>Sin movimientos</p></div>`;
 }
 
 function getMonths(n=6){return[...new Set(state.movs.map(m=>m.date.slice(0,7)))].sort().slice(-n);}
@@ -774,7 +1099,7 @@ function renderMovTable(){
   if(bancoId)movs=movs.filter(m=>m.bankId==bancoId);
   if(mes)movs=movs.filter(m=>m.date.startsWith(mes));
   movs.sort((a,b)=>b.date.localeCompare(a.date));
-  document.getElementById('mov-table-wrap').innerHTML=movs.length?buildMovTable(movs,true):`<div class="empty-state"><div class="empty-state-icon">🔍</div><p>Sin resultados</p></div>`;
+  document.getElementById('mov-table-wrap').innerHTML=movs.length?buildMovTable(movs,true):`<div class="empty-state"><div class="empty-state-icon">🔍</div><p>Sin resultados</p><span>Ajusta los filtros o agrega movimientos</span></div>`;
 }
 
 function buildMovTable(movs,del){
@@ -795,21 +1120,22 @@ function openMovModal(id=null){
   openModal('modal-mov');
 }
 
-function saveMov(){
+async function saveMov(){
   const type=document.getElementById('m-type').value,date=document.getElementById('m-date').value,
         desc=document.getElementById('m-desc').value.trim(),amount=parseFloat(document.getElementById('m-amount').value),
         bankId=parseInt(document.getElementById('m-bank').value),cat=document.getElementById('m-cat').value;
-  if(!desc||!amount||isNaN(amount)||!date||!bankId){showToast('⚠️ Completa todos los campos');return;}
-  if(state.editMovId){Object.assign(state.movs.find(x=>x.id===state.editMovId),{type,date,desc,amount,bankId,cat});showToast('✅ Actualizado');}
-  else{state.movs.push({id:nextId(state.movs),type,date,desc,amount,bankId,cat});showToast('✅ Registrado');}
+  if(!desc||!amount||isNaN(amount)||!date||!bankId){showToast('⚠️ Completa todos los campos obligatorios');return;}
+  if(state.editMovId){Object.assign(state.movs.find(x=>x.id===state.editMovId),{type,date,desc,amount,bankId,cat});showToast('✅ Movimiento actualizado');}
+  else{state.movs.push({id:nextId(state.movs),type,date,desc,amount,bankId,cat});showToast('✅ Movimiento registrado');}
   saveFin();closeModal('modal-mov');updateBadges();
   if(document.getElementById('page-movimientos').classList.contains('active'))renderMovTable();else renderDashboard();
+  autoSync();
 }
 
 function confirmDeleteMov(id){
   const m=state.movs.find(x=>x.id===id);
   document.getElementById('confirm-msg').textContent=`¿Eliminar "${m.desc}" por ${fmt(m.amount)}?`;
-  document.getElementById('confirm-btn').onclick=()=>{state.movs=state.movs.filter(x=>x.id!==id);saveFin();closeModal('modal-confirm');renderMovTable();updateBadges();showToast('🗑️ Eliminado');};
+  document.getElementById('confirm-btn').onclick=async()=>{state.movs=state.movs.filter(x=>x.id!==id);saveFin();closeModal('modal-confirm');renderMovTable();updateBadges();showToast('🗑️ Eliminado');autoSync();};
   openModal('modal-confirm');
 }
 
@@ -829,21 +1155,20 @@ function openBankModal(id=null){
   document.getElementById('color-swatches').innerHTML=COLORS.map(c=>`<span class="swatch ${c===sel?'selected':''}" style="background:${c}" onclick="selectColor('${c}')"></span>`).join('');
   openModal('modal-banco');
 }
-
 function selectColor(c){document.querySelectorAll('.swatch').forEach(s=>s.classList.remove('selected'));event.target.classList.add('selected');document.getElementById('b-color').value=c;}
 
-function saveBank(){
+async function saveBank(){
   const name=document.getElementById('b-name').value.trim(),number=document.getElementById('b-number').value.trim(),color=document.getElementById('b-color').value;
   if(!name){showToast('⚠️ Ingresa el nombre del banco');return;}
   if(state.editBankId){Object.assign(state.banks.find(x=>x.id===state.editBankId),{name,number,color});showToast('✅ Banco actualizado');}
   else{state.banks.push({id:nextId(state.banks),name,number,color});showToast('✅ Banco agregado');}
-  saveFin();closeModal('modal-banco');renderBankGrid();updateBadges();
+  saveFin();closeModal('modal-banco');renderBankGrid();updateBadges();autoSync();
 }
 
 function confirmDeleteBank(id){
   const b=state.banks.find(x=>x.id===id),cnt=state.movs.filter(m=>m.bankId===id).length;
   document.getElementById('confirm-msg').textContent=`¿Eliminar "${b.name}"?${cnt?' Tiene '+cnt+' movimiento(s).':''}`;
-  document.getElementById('confirm-btn').onclick=()=>{state.banks=state.banks.filter(x=>x.id!==id);saveFin();closeModal('modal-confirm');renderBankGrid();updateBadges();showToast('🗑️ Banco eliminado');};
+  document.getElementById('confirm-btn').onclick=async()=>{state.banks=state.banks.filter(x=>x.id!==id);saveFin();closeModal('modal-confirm');renderBankGrid();updateBadges();showToast('🗑️ Banco eliminado');autoSync();};
   openModal('modal-confirm');
 }
 
@@ -854,19 +1179,20 @@ function exportData(){
   const blob=new Blob([JSON.stringify({banks:state.banks,movs:state.movs},null,2)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
   a.download=`finanzapp-backup-${new Date().toISOString().slice(0,10)}.json`;a.click();
-  showToast('✅ Backup descargado');
+  showToast('✅ Backup JSON descargado');
 }
 
 function importData(event){
   const file=event.target.files[0];if(!file)return;
   const reader=new FileReader();
-  reader.onload=e=>{
+  reader.onload=async e=>{
     try{
       const data=JSON.parse(e.target.result);
       if(!data.banks||!data.movs)throw new Error();
       state.banks=data.banks;state.movs=data.movs;
       saveFin();updateBadges();renderDashboard();goTo('dashboard');
-      showToast(`✅ Importado: ${data.banks.length} bancos, ${data.movs.length} movimientos`);
+      showToast(`✅ Restaurado: ${data.banks.length} bancos, ${data.movs.length} movimientos`);
+      autoSync();
     }catch{showToast('❌ Archivo de backup inválido');}
   };
   reader.readAsText(file);event.target.value='';
