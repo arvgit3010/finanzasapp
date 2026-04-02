@@ -6,7 +6,6 @@
 <title>FinanzApp — Gestión Personal</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 <style>
 :root{
   --bg:#0f1117;--bg2:#171a22;--bg3:#1e222d;--bg4:#252a36;
@@ -403,6 +402,10 @@ tbody tr:hover td{background:var(--bg3)}
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
         Bancos<span class="nav-badge" id="badge-banks">0</span>
       </div>
+      <div class="nav-item" onclick="goTo('prestamos')" id="nav-prestamos">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+        Préstamos<span class="nav-badge" id="badge-loans">0</span>
+      </div>
       <div class="nav-section-label" style="margin-top:8px">Datos</div>
       <div class="nav-item" onclick="syncNow()" id="nav-sync">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
@@ -490,6 +493,25 @@ tbody tr:hover td{background:var(--bg3)}
       </div>
       <div class="grid-3" id="bank-grid"></div>
     </div>
+
+    <!-- PRÉSTAMOS -->
+    <div class="page" id="page-prestamos">
+      <div class="topbar">
+        <div><div class="page-title">Préstamos</div><div class="page-sub">Control de préstamos otorgados y sus cuotas</div></div>
+        <div class="topbar-actions">
+          <button class="btn btn-primary" onclick="openLoanModal()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Nuevo préstamo
+          </button>
+        </div>
+      </div>
+
+      <!-- Métricas resumen -->
+      <div class="metrics-grid" id="loan-metrics" style="grid-template-columns:repeat(3,minmax(0,1fr))"></div>
+
+      <!-- Listado de préstamos -->
+      <div id="loans-list"></div>
+    </div>
   </main>
 </div>
 
@@ -542,6 +564,90 @@ tbody tr:hover td{background:var(--bg3)}
       <button class="btn" onclick="closeModal('modal-sheets')">Cancelar</button>
       <button class="btn btn-primary" onclick="connectSheets()">Conectar con Google →</button>
     </div>
+  </div>
+</div>
+
+<!-- MODAL: Nuevo/Editar Préstamo -->
+<div class="overlay" id="modal-loan" onclick="if(event.target===this)closeModal('modal-loan')">
+  <div class="modal" style="width:520px;max-height:90vh;overflow-y:auto">
+    <div class="modal-title" id="loan-modal-title">Nuevo préstamo</div>
+
+    <div class="field"><label>Deudor / A quién se prestó *</label>
+      <input type="text" id="l-person" placeholder="Ej: Juan Pérez, Empresa XYZ...">
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Monto prestado (S/) *</label>
+        <input type="number" id="l-amount" placeholder="0.00" min="0" step="0.01" oninput="calcLoan()">
+      </div>
+      <div class="field"><label>N° de cuotas *</label>
+        <input type="number" id="l-installments" placeholder="12" min="1" step="1" oninput="calcLoan()">
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Fecha primer pago *</label>
+        <input type="date" id="l-start-date">
+      </div>
+      <div class="field"><label>Frecuencia de pago</label>
+        <select id="l-freq" onchange="calcLoan()">
+          <option value="30">Mensual</option>
+          <option value="15">Quincenal</option>
+          <option value="7">Semanal</option>
+          <option value="1">Diario</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- TIPO DE INTERÉS -->
+    <div class="field">
+      <label>Tipo de interés</label>
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius);padding:8px 12px;font-size:13px;font-weight:400">
+          <input type="radio" name="l-interest-type" value="none" checked onchange="calcLoan()"> Sin interés
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius);padding:8px 12px;font-size:13px;font-weight:400">
+          <input type="radio" name="l-interest-type" value="simple" onchange="calcLoan()"> Interés simple %
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius);padding:8px 12px;font-size:13px;font-weight:400">
+          <input type="radio" name="l-interest-type" value="fixed" onchange="calcLoan()"> Monto fijo x cuota
+        </label>
+      </div>
+    </div>
+
+    <div id="l-interest-fields" style="display:none">
+      <div class="field" id="l-rate-field">
+        <label id="l-rate-label">Tasa de interés mensual (%)</label>
+        <input type="number" id="l-rate" placeholder="5" min="0" step="0.01" oninput="calcLoan()">
+      </div>
+    </div>
+
+    <div class="field"><label>Descripción / motivo</label>
+      <input type="text" id="l-desc" placeholder="Ej: Préstamo personal, negocio...">
+    </div>
+
+    <!-- PREVIEW DEL CÁLCULO -->
+    <div id="loan-preview" style="display:none;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:14px;margin-top:4px">
+      <div style="font-size:12px;font-weight:500;color:var(--text2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px">Vista previa del cálculo</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+        <div><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Capital</div><div style="font-size:15px;font-weight:600;font-family:var(--mono);color:var(--blue)" id="prev-capital">—</div></div>
+        <div><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Total interés</div><div style="font-size:15px;font-weight:600;font-family:var(--mono);color:var(--amber)" id="prev-interest">—</div></div>
+        <div><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Cuota</div><div style="font-size:15px;font-weight:600;font-family:var(--mono);color:var(--green)" id="prev-installment">—</div></div>
+      </div>
+      <div style="margin-top:10px;font-size:12px;color:var(--text3)" id="prev-total-label"></div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal('modal-loan')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveLoan()">Guardar préstamo</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Detalle de cuotas -->
+<div class="overlay" id="modal-loan-detail" onclick="if(event.target===this)closeModal('modal-loan-detail')">
+  <div class="modal" style="width:600px;max-height:90vh;overflow-y:auto">
+    <div class="modal-title" id="loan-detail-title">Cuotas del préstamo</div>
+    <div id="loan-detail-content"></div>
+    <div class="modal-actions"><button class="btn" onclick="closeModal('modal-loan-detail')">Cerrar</button></div>
   </div>
 </div>
 
@@ -857,9 +963,17 @@ async function setupStep1(){
   _setupSecret=TOTP.generateSecret();
   const uri=`otpauth://totp/FinanzApp:usuario?secret=${_setupSecret}&issuer=FinanzApp&algorithm=SHA1&digits=6&period=30`;
   document.getElementById('secret-display').textContent=_setupSecret;
-  const qrDiv=document.getElementById('qr-container');qrDiv.innerHTML='';
-  try{const c=document.createElement('canvas');qrDiv.appendChild(c);QRCode.toCanvas(c,uri,{width:200,margin:1,color:{dark:'#000',light:'#fff'}});}
-  catch(e){qrDiv.innerHTML=`<div style="padding:16px;font-size:12px;color:#333;text-align:center">Usa el código manual.</div>`;}
+  const qrDiv=document.getElementById('qr-container');
+  qrDiv.innerHTML='';
+  // Google Charts QR API — 100% compatible con Google Authenticator
+  const encoded = encodeURIComponent(uri);
+  const img = document.createElement('img');
+  img.src = `https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=${encoded}&choe=UTF-8&chld=M|1`;
+  img.width = 200; img.height = 200; img.alt = 'QR Code';
+  img.onerror = () => {
+    qrDiv.innerHTML='<div style="padding:16px;font-size:12px;color:#333;text-align:center">No se pudo cargar el QR.<br>Usa el código manual de arriba.</div>';
+  };
+  qrDiv.appendChild(img);
   showSetupStep(2);
 }
 
@@ -1034,7 +1148,7 @@ function clearOtpInputs(cid){document.querySelectorAll(`#${cid} .otp-digit`).for
 //  APP DATA
 // ══════════════════════════════════════════════
 const COLORS=['#5b8cfa','#22d17a','#f25c5c','#f5a623','#a78bfa','#38bdf8','#fb7185','#34d399','#fbbf24','#60a5fa'];
-let state={banks:[],movs:[]};let charts={bar:null,doughnut:null};
+let state={banks:[],movs:[],loans:[]};let charts={bar:null,doughnut:null};
 
 function saveFin(){try{localStorage.setItem('fapp_data',JSON.stringify(state));}catch(e){}}
 function loadFin(){try{const d=localStorage.getItem('fapp_data');if(d)state={...state,...JSON.parse(d)};}catch(e){}}
@@ -1067,7 +1181,7 @@ function fmt(n){return'S/ '+Math.abs(n).toLocaleString('es-PE',{minimumFractionD
 function bankById(id){return state.banks.find(b=>b.id==id)||{name:'—',color:'#888',number:''};}
 function nextId(arr){return arr.length?Math.max(...arr.map(x=>x.id))+1:1;}
 function bankBalance(id){return state.movs.filter(m=>m.bankId==id).reduce((s,m)=>s+(m.type==='ingreso'?m.amount:-m.amount),0);}
-function updateBadges(){document.getElementById('badge-movs').textContent=state.movs.length;document.getElementById('badge-banks').textContent=state.banks.length;}
+function updateBadges(){document.getElementById('badge-movs').textContent=state.movs.length;document.getElementById('badge-banks').textContent=state.banks.length;const bl=document.getElementById('badge-loans');if(bl)bl.textContent=state.loans.length;}
 function showToast(msg,dur=2800){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),dur);}
 
 function goTo(page){
@@ -1078,6 +1192,7 @@ function goTo(page){
   if(page==='dashboard')renderDashboard();
   if(page==='movimientos')renderMovPage();
   if(page==='bancos')renderBankGrid();
+  if(page==='prestamos')renderLoansPage();
   updateBadges();
 }
 
@@ -1202,7 +1317,7 @@ function openModal(id){document.getElementById(id).classList.add('open');}
 function closeModal(id){document.getElementById(id).classList.remove('open');}
 
 function exportData(){
-  const blob=new Blob([JSON.stringify({banks:state.banks,movs:state.movs},null,2)],{type:'application/json'});
+  const blob=new Blob([JSON.stringify({banks:state.banks,movs:state.movs,loans:state.loans},null,2)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
   a.download=`finanzapp-backup-${new Date().toISOString().slice(0,10)}.json`;a.click();
   showToast('✅ Backup JSON descargado');
@@ -1216,6 +1331,7 @@ function importData(event){
       const data=JSON.parse(e.target.result);
       if(!data.banks||!data.movs)throw new Error();
       state.banks=data.banks;state.movs=data.movs;
+      if(data.loans)state.loans=data.loans;
       saveFin();updateBadges();renderDashboard();goTo('dashboard');
       showToast(`✅ Restaurado: ${data.banks.length} bancos, ${data.movs.length} movimientos`);
       autoSync();
@@ -1223,6 +1339,287 @@ function importData(event){
   };
   reader.readAsText(file);event.target.value='';
 }
+
+// ══════════════════════════════════════════════
+//  MÓDULO PRÉSTAMOS
+// ══════════════════════════════════════════════
+
+// ── Helpers de cálculo ──────────────────────
+function calcLoanSchedule(amount, installments, rate, type, startDate, freqDays) {
+  const schedule = [];
+  let balance = amount;
+  let totalInterest = 0;
+
+  for (let i = 1; i <= installments; i++) {
+    const dueDate = new Date(startDate);
+    dueDate.setDate(dueDate.getDate() + freqDays * (i - 1));
+    const dueDateStr = dueDate.toISOString().slice(0, 10);
+
+    let interest = 0;
+    let capital = 0;
+    let cuota = 0;
+
+    if (type === 'none') {
+      capital = +(amount / installments).toFixed(2);
+      if (i === installments) capital = +balance.toFixed(2); // last covers rounding
+      cuota = capital;
+      interest = 0;
+    } else if (type === 'simple') {
+      // Interés simple: se aplica sobre el saldo pendiente cada periodo
+      interest = +(balance * (rate / 100)).toFixed(2);
+      capital = +(amount / installments).toFixed(2);
+      if (i === installments) capital = +balance.toFixed(2);
+      cuota = +(capital + interest).toFixed(2);
+    } else if (type === 'fixed') {
+      // Monto fijo de interés por cuota (rate = S/ fijo por período)
+      interest = +rate.toFixed(2);
+      capital = +(amount / installments).toFixed(2);
+      if (i === installments) capital = +balance.toFixed(2);
+      cuota = +(capital + interest).toFixed(2);
+    }
+
+    balance = +(balance - capital).toFixed(2);
+    totalInterest = +(totalInterest + interest).toFixed(2);
+    schedule.push({ num: i, dueDate: dueDateStr, capital, interest, cuota, paid: false });
+  }
+  return { schedule, totalInterest };
+}
+
+function getLoanInterestParams() {
+  const type = document.querySelector('input[name="l-interest-type"]:checked')?.value || 'none';
+  const rate = parseFloat(document.getElementById('l-rate')?.value) || 0;
+  return { type, rate };
+}
+
+function calcLoan() {
+  const amount = parseFloat(document.getElementById('l-amount').value) || 0;
+  const installments = parseInt(document.getElementById('l-installments').value) || 0;
+  const { type, rate } = getLoanInterestParams();
+  const freq = parseInt(document.getElementById('l-freq').value) || 30;
+
+  // Show/hide interest field
+  const iFields = document.getElementById('l-interest-fields');
+  const rateField = document.getElementById('l-rate-field');
+  const rateLabel = document.getElementById('l-rate-label');
+  if (type === 'none') {
+    iFields.style.display = 'none';
+  } else {
+    iFields.style.display = 'block';
+    if (type === 'simple') {
+      rateLabel.textContent = 'Tasa de interés por periodo (%)';
+      document.getElementById('l-rate').placeholder = 'Ej: 5';
+    } else {
+      rateLabel.textContent = 'Interés fijo por cuota (S/)';
+      document.getElementById('l-rate').placeholder = 'Ej: 50';
+    }
+  }
+
+  const preview = document.getElementById('loan-preview');
+  if (!amount || !installments) { preview.style.display = 'none'; return; }
+
+  const startDate = document.getElementById('l-start-date').value || new Date().toISOString().slice(0,10);
+  const { schedule, totalInterest } = calcLoanSchedule(amount, installments, rate, type, startDate, freq);
+  const cuota = schedule[0]?.cuota || 0;
+  const total = amount + totalInterest;
+
+  preview.style.display = 'block';
+  document.getElementById('prev-capital').textContent = fmt(amount);
+  document.getElementById('prev-interest').textContent = fmt(totalInterest);
+  document.getElementById('prev-installment').textContent = fmt(cuota) + (type === 'none' ? '' : ' aprox.');
+  document.getElementById('prev-total-label').textContent =
+    `Total a cobrar: ${fmt(total)} · ${installments} cuota(s) · cada ${freq===30?'mes':freq===15?'quincena':freq===7?'semana':'día'}`;
+}
+
+// ── CRUD préstamos ──────────────────────────
+function openLoanModal(id = null) {
+  state.editLoanId = id;
+  const loan = id ? state.loans.find(x => x.id === id) : null;
+  document.getElementById('loan-modal-title').textContent = id ? 'Editar préstamo' : 'Nuevo préstamo';
+  document.getElementById('l-person').value = loan?.person || '';
+  document.getElementById('l-amount').value = loan?.amount || '';
+  document.getElementById('l-installments').value = loan?.installments || '';
+  document.getElementById('l-start-date').value = loan?.startDate || new Date().toISOString().slice(0,10);
+  document.getElementById('l-freq').value = loan?.freqDays || 30;
+  document.getElementById('l-desc').value = loan?.desc || '';
+  // Interest type
+  const itype = loan?.interestType || 'none';
+  document.querySelector(`input[name="l-interest-type"][value="${itype}"]`).checked = true;
+  if (document.getElementById('l-rate')) document.getElementById('l-rate').value = loan?.rate || '';
+  calcLoan();
+  openModal('modal-loan');
+}
+
+function saveLoan() {
+  const person = document.getElementById('l-person').value.trim();
+  const amount = parseFloat(document.getElementById('l-amount').value);
+  const installments = parseInt(document.getElementById('l-installments').value);
+  const startDate = document.getElementById('l-start-date').value;
+  const freqDays = parseInt(document.getElementById('l-freq').value) || 30;
+  const desc = document.getElementById('l-desc').value.trim();
+  const { type, rate } = getLoanInterestParams();
+
+  if (!person || !amount || !installments || !startDate) {
+    showToast('⚠️ Completa los campos obligatorios'); return;
+  }
+
+  const { schedule, totalInterest } = calcLoanSchedule(amount, installments, rate, type, startDate, freqDays);
+
+  if (state.editLoanId) {
+    const loan = state.loans.find(x => x.id === state.editLoanId);
+    // Preserve paid status on existing schedule
+    const oldSchedule = loan.schedule;
+    schedule.forEach((s, i) => { if (oldSchedule[i]?.paid) s.paid = true; });
+    Object.assign(loan, { person, amount, installments, startDate, freqDays, desc, interestType: type, rate, schedule, totalInterest });
+    showToast('✅ Préstamo actualizado');
+  } else {
+    state.loans.push({
+      id: nextId(state.loans), person, amount, installments, startDate,
+      freqDays, desc, interestType: type, rate, schedule, totalInterest,
+      createdAt: new Date().toISOString().slice(0,10)
+    });
+    showToast('✅ Préstamo registrado');
+  }
+  saveFin(); closeModal('modal-loan'); renderLoansPage(); updateBadges();
+}
+
+function confirmDeleteLoan(id) {
+  const loan = state.loans.find(x => x.id === id);
+  document.getElementById('confirm-msg').textContent = `¿Eliminar el préstamo de "${loan.person}" por ${fmt(loan.amount)}?`;
+  document.getElementById('confirm-btn').onclick = () => {
+    state.loans = state.loans.filter(x => x.id !== id);
+    saveFin(); closeModal('modal-confirm'); renderLoansPage(); updateBadges();
+    showToast('🗑️ Préstamo eliminado');
+  };
+  openModal('modal-confirm');
+}
+
+function toggleInstallment(loanId, num) {
+  const loan = state.loans.find(x => x.id === loanId);
+  const inst = loan.schedule.find(s => s.num === num);
+  inst.paid = !inst.paid;
+  saveFin(); renderLoanDetail(loanId); renderLoansPage();
+  showToast(inst.paid ? '✅ Cuota marcada como pagada' : '↩️ Cuota marcada como pendiente');
+}
+
+// ── Render ──────────────────────────────────
+function renderLoansPage() {
+  const loans = state.loans;
+  // Metrics
+  const totalPrestado = loans.reduce((s, l) => s + l.amount, 0);
+  const totalCobrado = loans.reduce((s, l) =>
+    s + l.schedule.filter(x => x.paid).reduce((a, b) => a + b.cuota, 0), 0);
+  const totalPendiente = loans.reduce((s, l) =>
+    s + l.schedule.filter(x => !x.paid).reduce((a, b) => a + b.cuota, 0), 0);
+
+  document.getElementById('loan-metrics').innerHTML = `
+    <div class="metric-card mc-blue"><div class="metric-label">Total prestado</div><div class="metric-value blue">${fmt(totalPrestado)}</div><div class="metric-trend">${loans.length} préstamo(s)</div></div>
+    <div class="metric-card mc-green"><div class="metric-label">Total cobrado</div><div class="metric-value green">${fmt(totalCobrado)}</div></div>
+    <div class="metric-card mc-amber"><div class="metric-label">Por cobrar</div><div class="metric-value amber">${fmt(totalPendiente)}</div></div>
+  `;
+
+  if (!loans.length) {
+    document.getElementById('loans-list').innerHTML = `
+      <div class="empty-state"><div class="empty-state-icon">💸</div>
+      <p>Sin préstamos registrados</p><span>Haz clic en "Nuevo préstamo" para comenzar</span></div>`;
+    return;
+  }
+
+  document.getElementById('loans-list').innerHTML = loans.map(loan => {
+    const paid = loan.schedule.filter(s => s.paid).length;
+    const total = loan.schedule.length;
+    const pct = total ? Math.round(paid / total * 100) : 0;
+    const cobrado = loan.schedule.filter(s => s.paid).reduce((a, b) => a + b.cuota, 0);
+    const pendiente = loan.schedule.filter(s => !s.paid).reduce((a, b) => a + b.cuota, 0);
+    const next = loan.schedule.find(s => !s.paid);
+    const isComplete = paid === total;
+    const typeLabel = {none:'Sin interés', simple:'Interés simple', fixed:'Monto fijo'}[loan.interestType] || '';
+
+    return `<div class="card" style="margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px">
+        <div>
+          <div style="font-size:16px;font-weight:600;margin-bottom:3px">${loan.person}</div>
+          <div style="font-size:12px;color:var(--text3)">${loan.desc||'Sin descripción'} · ${typeLabel} · desde ${loan.startDate}</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span class="badge ${isComplete?'badge-ingreso':'badge-egreso'}">${isComplete?'✓ Completado':'En curso'}</span>
+          <button class="btn btn-sm" onclick="openLoanDetail(${loan.id})">Ver cuotas</button>
+          <button class="btn btn-sm" onclick="openLoanModal(${loan.id})">Editar</button>
+          <button class="btn btn-sm btn-danger" onclick="confirmDeleteLoan(${loan.id})">Eliminar</button>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:14px 0 10px">
+        <div><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Capital</div>
+          <div style="font-size:16px;font-weight:600;font-family:var(--mono);color:var(--blue)">${fmt(loan.amount)}</div></div>
+        <div><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Interés total</div>
+          <div style="font-size:16px;font-weight:600;font-family:var(--mono);color:var(--amber)">${fmt(loan.totalInterest)}</div></div>
+        <div><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Cobrado</div>
+          <div style="font-size:16px;font-weight:600;font-family:var(--mono);color:var(--green)">${fmt(cobrado)}</div></div>
+        <div><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Pendiente</div>
+          <div style="font-size:16px;font-weight:600;font-family:var(--mono);color:var(--amber)">${fmt(pendiente)}</div></div>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="flex:1;height:6px;background:var(--bg4);border-radius:3px;overflow:hidden">
+          <div style="height:100%;width:${pct}%;background:${isComplete?'var(--green)':'var(--blue)'};border-radius:3px;transition:width .3s"></div>
+        </div>
+        <div style="font-size:12px;color:var(--text2);white-space:nowrap">${paid}/${total} cuotas · ${pct}%</div>
+        ${next ? `<div style="font-size:11px;color:var(--amber)">Próximo: ${next.dueDate}</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openLoanDetail(id) {
+  document.getElementById('loan-detail-title').textContent = 'Cuotas — ' + state.loans.find(x=>x.id===id)?.person;
+  renderLoanDetail(id);
+  openModal('modal-loan-detail');
+}
+
+function renderLoanDetail(id) {
+  const loan = state.loans.find(x => x.id === id);
+  if (!loan) return;
+  const rows = loan.schedule.map(s => `
+    <tr style="${s.paid?'opacity:.55':''}">
+      <td style="font-family:var(--mono);font-size:12px;color:var(--text2);text-align:center">${s.num}</td>
+      <td style="font-family:var(--mono);font-size:12px">${s.dueDate}</td>
+      <td style="text-align:right;font-family:var(--mono)">${fmt(s.capital)}</td>
+      <td style="text-align:right;font-family:var(--mono);color:var(--amber)">${fmt(s.interest)}</td>
+      <td style="text-align:right;font-family:var(--mono);font-weight:600;color:var(--green)">${fmt(s.cuota)}</td>
+      <td style="text-align:center">
+        <label style="cursor:pointer;display:inline-flex;align-items:center;gap:5px;font-size:12px">
+          <input type="checkbox" ${s.paid?'checked':''} onchange="toggleInstallment(${id},${s.num})"
+            style="width:15px;height:15px;accent-color:var(--green);cursor:pointer">
+          ${s.paid?'<span style="color:var(--green)">Pagado</span>':'<span style="color:var(--text3)">Pendiente</span>'}
+        </label>
+      </td>
+    </tr>`).join('');
+
+  const totalCuota = loan.schedule.reduce((a,b)=>a+b.cuota,0);
+  const totalPaid = loan.schedule.filter(s=>s.paid).reduce((a,b)=>a+b.cuota,0);
+
+  document.getElementById('loan-detail-content').innerHTML = `
+    <div style="background:var(--bg3);border-radius:var(--radius);padding:12px 14px;margin-bottom:14px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;font-size:13px">
+      <div><span style="color:var(--text3)">Capital:</span> <strong>${fmt(loan.amount)}</strong></div>
+      <div><span style="color:var(--text3)">Interés total:</span> <strong style="color:var(--amber)">${fmt(loan.totalInterest)}</strong></div>
+      <div><span style="color:var(--text3)">Total a cobrar:</span> <strong>${fmt(loan.amount+loan.totalInterest)}</strong></div>
+      <div><span style="color:var(--text3)">Cobrado:</span> <strong style="color:var(--green)">${fmt(totalPaid)}</strong></div>
+      <div><span style="color:var(--text3)">Pendiente:</span> <strong style="color:var(--amber)">${fmt(totalCuota-totalPaid)}</strong></div>
+      <div><span style="color:var(--text3)">Deudor:</span> <strong>${loan.person}</strong></div>
+    </div>
+    <div class="table-wrap"><table>
+      <thead><tr>
+        <th style="text-align:center">#</th>
+        <th>Fecha venc.</th>
+        <th style="text-align:right">Capital</th>
+        <th style="text-align:right">Interés</th>
+        <th style="text-align:right">Cuota total</th>
+        <th style="text-align:center">Estado</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table></div>`;
+}
+
 </script>
 </body>
 </html>
