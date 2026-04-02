@@ -683,42 +683,68 @@ const GS = {
     });
   },
 
+  // ── CLEAR SHEET — único método correcto para reflejar eliminaciones ──
+  // PUT con values:[] NO borra filas en Sheets API. Solo :clear lo hace.
+  async clearSheet(sheetName) {
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${this.sheetId}/values/${encodeURIComponent(sheetName)}!A1:Z10000:clear`;
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + this.token, 'Content-Type': 'application/json' }
+    });
+    if (!resp.ok) throw new Error('Clear failed: ' + resp.status);
+    return resp.json();
+  },
+
   // ── WRITE ALL DATA ──────────────────────────────
+  // FIX: Primero borra cada hoja completa (clearSheet), luego escribe datos frescos.
+  // Esto garantiza que filas eliminadas en la app desaparezcan del Sheet.
   async writeAll(state) {
     await this.findOrCreateSheet();
     const banks = state.banks;
-    const movRows = [['ID','Fecha','Descripción','Tipo','Monto','Banco','Categoría'],
-      ...state.movs.map(m => [m.id, m.date, m.desc, m.type, m.amount, (banks.find(b=>b.id==m.bankId)||{name:'—'}).name, m.cat||''])
-    ];
-    const bankRows = [['ID','Nombre','Número de cuenta','Color'],
-      ...banks.map(b => [b.id, b.name, b.number||'', b.color])
-    ];
-    const ing = state.movs.filter(m=>m.type==='ingreso').reduce((s,m)=>s+m.amount,0);
-    const egr = state.movs.filter(m=>m.type==='egreso').reduce((s,m)=>s+m.amount,0);
-    const resumeRows = [
-      ['Concepto','Valor'],
-      ['Total Ingresos', ing],
-      ['Total Egresos', egr],
-      ['Balance Neto', ing-egr],
-      ['Última sincronización', new Date().toLocaleString('es-PE')],
-      ['Total movimientos', state.movs.length],
-      ['Total bancos', banks.length],
-    ];
-    await Promise.all([
-      this.api('PUT', `/v4/spreadsheets/${this.sheetId}/values/Movimientos!A1:G${movRows.length}?valueInputOption=USER_ENTERED`, { values: movRows }),
-      this.api('PUT', `/v4/spreadsheets/${this.sheetId}/values/Bancos!A1:D${bankRows.length}?valueInputOption=USER_ENTERED`, { values: bankRows }),
-      this.api('PUT', `/v4/spreadsheets/${this.sheetId}/values/Resumen!A1:B${resumeRows.length}?valueInputOption=USER_ENTERED`, { values: resumeRows }),
-    ]);
-    // Clear old rows beyond current data
-    await this.clearBeyond('Movimientos', movRows.length, 7);
-    await this.clearBeyond('Bancos', bankRows.length, 4);
-  },
 
-  async clearBeyond(sheet, fromRow, cols) {
-    try {
-      const colLetter = String.fromCharCode(64 + cols);
-      await this.api('PUT', `/v4/spreadsheets/${this.sheetId}/values/${sheet}!A${fromRow+1}:${colLetter}1000?valueInputOption=USER_ENTERED`, { values: [] });
-    } catch(e) {}
+    const movRows = [
+      ['ID','Fecha','Descripcion','Tipo','Monto','Banco','Categoria'],
+      ...state.movs.map(m => [
+        m.id, m.date, m.desc, m.type, m.amount,
+        (banks.find(b => b.id == m.bankId) || { name: 'Sin banco' }).name,
+        m.cat || ''
+      ])
+    ];
+    const bankRows = [
+      ['ID','Nombre','Numero de cuenta','Color'],
+      ...banks.map(b => [b.id, b.name, b.number || '', b.color])
+    ];
+    const ing = state.movs.filter(m => m.type === 'ingreso').reduce((s, m) => s + m.amount, 0);
+    const egr = state.movs.filter(m => m.type === 'egreso').reduce((s, m) => s + m.amount, 0);
+    const resumeRows = [
+      ['Concepto', 'Valor'],
+      ['Total Ingresos',        ing],
+      ['Total Egresos',         egr],
+      ['Balance Neto',          ing - egr],
+      ['Ultima sincronizacion', new Date().toLocaleString('es-PE')],
+      ['Total movimientos',     state.movs.length],
+      ['Total bancos',          banks.length],
+    ];
+
+    // Paso 1: borrar hojas completas (elimina filas sobrantes de registros borrados)
+    await Promise.all([
+      this.clearSheet('Movimientos'),
+      this.clearSheet('Bancos'),
+      this.clearSheet('Resumen'),
+    ]);
+
+    // Paso 2: escribir datos frescos
+    await Promise.all([
+      this.api('PUT',
+        `/v4/spreadsheets/${this.sheetId}/values/Movimientos!A1:G${movRows.length}?valueInputOption=USER_ENTERED`,
+        { values: movRows }),
+      this.api('PUT',
+        `/v4/spreadsheets/${this.sheetId}/values/Bancos!A1:D${bankRows.length}?valueInputOption=USER_ENTERED`,
+        { values: bankRows }),
+      this.api('PUT',
+        `/v4/spreadsheets/${this.sheetId}/values/Resumen!A1:B${resumeRows.length}?valueInputOption=USER_ENTERED`,
+        { values: resumeRows }),
+    ]);
   },
 
   // ── READ ALL DATA ───────────────────────────────
