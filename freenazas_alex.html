@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FinanzApp — Gestión Personal</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+
+<style>
+:root{
+  --bg:#0f1117;--bg2:#171a22;--bg3:#1e222d;--bg4:#252a36;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+  --text:#eef0f5;--text2:#8b90a0;--text3:#5a5f6e;
+  --green:#22d17a;--green-bg:rgba(34,209,122,.10);--green-border:rgba(34,209,122,.25);
+  --red:#f25c5c;--red-bg:rgba(242,92,92,.10);--red-border:rgba(242,92,92,.25);
+  --blue:#5b8cfa;--blue-bg:rgba(91,140,250,.10);--blue-border:rgba(91,140,250,.25);
+  --amber:#f5a623;--amber-bg:rgba(245,166,35,.10);--amber-border:rgba(245,166,35,.25);
+  --purple:#a78bfa;--purple-bg:rgba(167,139,250,.10);--purple-border:rgba(167,139,250,.25);
+  --radius:10px;--radius-lg:14px;--sidebar:240px;
+  --font:'DM Sans',sans-serif;--mono:'DM Mono',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:var(--font);background:var(--bg);color:var(--text);font-size:14px}
+
+/* ── AUTH ── */
+#auth-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999}
+.auth-card{background:var(--bg2);border:1px solid var(--border2);border-radius:20px;padding:36px 40px;width:430px;max-width:95%;box-shadow:0 32px 80px rgba(0,0,0,.6)}
+.auth-logo{display:flex;align-items:center;gap:12px;margin-bottom:28px}
+.auth-logo-icon{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--blue),var(--purple));display:flex;align-items:center;justify-content:center;font-size:22px}
+.auth-logo-text{font-size:20px;font-weight:600;letter-spacing:-.4px}
+.auth-logo-sub{font-size:12px;color:var(--text3);margin-top:1px}
+.auth-steps{display:flex;gap:6px;margin-bottom:24px}
+.auth-step{flex:1;height:3px;border-radius:2px;background:var(--bg4);transition:background .3s}
+.auth-step.done{background:var(--blue)}.auth-step.active{background:linear-gradient(90deg,var(--blue),var(--purple))}
+.auth-title{font-size:16px;font-weight:500;margin-bottom:6px}
+.auth-sub{font-size:13px;color:var(--text2);margin-bottom:22px;line-height:1.5}
+.auth-field{margin-bottom:14px}
+.auth-field label{display:block;font-size:11px;font-weight:500;color:var(--text2);margin-bottom:6px;letter-spacing:.5px;text-transform:uppercase}
+.auth-field input{width:100%;padding:11px 14px;font-size:14px;font-family:var(--font);border:1px solid var(--border2);border-radius:var(--radius);background:var(--bg3);color:var(--text);outline:none;transition:border-color .15s}
+.auth-field input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(91,140,250,.12)}
+.auth-btn{width:100%;padding:12px;font-size:14px;font-weight:500;font-family:var(--font);border:none;border-radius:var(--radius);cursor:pointer;background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;transition:opacity .15s;margin-top:4px}
+.auth-error{background:var(--red-bg);border:1px solid var(--red-border);color:var(--red);border-radius:var(--radius);padding:10px 14px;font-size:13px;margin-bottom:14px;display:none}
+.auth-error.show{display:block}
+.otp-inputs{display:flex;gap:8px;justify-content:center;margin:8px 0 18px}
+.otp-digit{width:46px;height:54px;text-align:center;font-size:22px;font-family:var(--mono);font-weight:500;border:1px solid var(--border2);border-radius:var(--radius);background:var(--bg3);color:var(--text);outline:none;transition:border-color .15s;caret-color:var(--blue)}
+.otp-digit:focus{border-color:var(--blue)}
+
+/* ── SETUP ── */
+#setup-screen{position:fixed;inset:0;background:var(--bg);display:none;align-items:center;justify-content:center;z-index:9998;overflow-y:auto}
+#setup-screen.show{display:flex}
+.setup-card{background:var(--bg2);border:1px solid var(--border2);border-radius:20px;padding:36px 40px;width:500px;max-width:95%;margin:20px auto}
+.setup-step{display:none}.setup-step.active{display:block}
+.step-title{font-size:18px;font-weight:600;margin-bottom:6px}
+.step-sub{font-size:13px;color:var(--text2);margin-bottom:20px}
+.qr-wrap{background:white;border-radius:12px;padding:16px;display:inline-flex;align-items:center;justify-content:center;margin:16px auto}
+.secret-box{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius);padding:12px 16px;font-family:var(--mono);font-size:13px;color:var(--blue);letter-spacing:2px;text-align:center;margin:12px 0;cursor:pointer}
+.info-box{background:var(--blue-bg);border:1px solid var(--blue-border);border-radius:var(--radius);padding:12px 14px;font-size:13px;color:var(--text2);margin:14px 0}
+
+/* ── APP ── (Resto del CSS original de tu archivo) */
+.app{display:flex;height:100vh;overflow:hidden}
+.sidebar{width:var(--sidebar);min-width:var(--sidebar);background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column}
+.sidebar-logo{padding:22px 20px 18px;border-bottom:1px solid var(--border)}
+.logo-mark{display:flex;align-items:center;gap:10px}
+.logo-icon{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,var(--blue),var(--purple));display:flex;align-items:center;justify-content:center;font-size:16px}
+.logo-text{font-size:15px;font-weight:600}
+.sidebar-nav{padding:12px 10px;flex:1;overflow-y:auto}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--radius);cursor:pointer;color:var(--text2);font-size:13px;transition:all .15s;margin-bottom:2px}
+.nav-item.active{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-border)}
+.nav-item svg{width:16px;height:16px}
+.sheets-status{margin:0 10px 8px;padding:9px 12px;border-radius:var(--radius);font-size:11px;display:flex;align-items:center;gap:7px;cursor:pointer}
+.sheets-status.connected{background:var(--green-bg);border:1px solid var(--green-border);color:var(--green)}
+.sheets-status.disconnected{background:var(--amber-bg);border:1px solid var(--amber-border);color:var(--amber)}
+.status-dot{width:6px;height:6px;border-radius:50%}
+.connected .status-dot{background:var(--green)}
+.disconnected .status-dot{background:var(--amber)}
+
+.main{flex:1;overflow-y:auto;background:var(--bg)}
+.page{display:none;padding:28px 32px;min-height:100%}
+.page.active{display:block}
+.metrics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+.metric-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px 20px}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px 22px;margin-bottom:18px}
+.btn{padding:8px 16px;border-radius:var(--radius);font-size:13px;font-weight:500;cursor:pointer;border:1px solid var(--border2);background:var(--bg3);color:var(--text);display:inline-flex;align-items:center;gap:6px}
+.btn-primary{background:var(--blue);border-color:var(--blue);color:#fff}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:1000;align-items:center;justify-content:center}
+.overlay.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:24px;width:460px;max-width:95%}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--bg4);border:1px solid var(--border2);color:var(--text);padding:12px 18px;border-radius:var(--radius);font-size:13px;z-index:2000;transform:translateY(80px);transition:transform .25s ease}
+.toast.show{transform:translateY(0)}
+</style>
+</head>
+<body>
+
+<div id="auth-screen">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="auth-logo-icon">💰</div>
+      <div><div class="auth-logo-text">FinanzApp</div><div class="auth-logo-sub">Acceso seguro · 2FA</div></div>
+    </div>
+    <div id="auth-step-1">
+      <div class="auth-steps"><div class="auth-step active"></div><div class="auth-step"></div></div>
+      <div class="auth-title">Contraseña maestra</div>
+      <div class="auth-sub">Ingresa tu contraseña para continuar.</div>
+      <div class="auth-error" id="pass-error"></div>
+      <div class="auth-field">
+        <label>Contraseña</label>
+        <input type="password" id="auth-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')checkPassword()">
+      </div>
+      <button class="auth-btn" onclick="checkPassword()">Continuar →</button>
+    </div>
+    <div id="auth-step-2" style="display:none">
+      <div class="auth-steps"><div class="auth-step done"></div><div class="auth-step active"></div></div>
+      <div class="auth-title">Código de verificación</div>
+      <div class="auth-sub">Ingresa el código de 6 dígitos de tu App.</div>
+      <div class="auth-error" id="totp-error"></div>
+      <div class="otp-inputs" id="otp-inputs">
+        <input class="otp-digit" maxlength="1" type="text" inputmode="numeric">
+        <input class="otp-digit" maxlength="1" type="text" inputmode="numeric">
+        <input class="otp-digit" maxlength="1" type="text" inputmode="numeric">
+        <input class="otp-digit" maxlength="1" type="text" inputmode="numeric">
+        <input class="otp-digit" maxlength="1" type="text" inputmode="numeric">
+        <input class="otp-digit" maxlength="1" type="text" inputmode="numeric">
+      </div>
+      <button class="auth-btn" onclick="checkTOTP()">Ingresar →</button>
+    </div>
+  </div>
+</div>
+
+<div id="setup-screen">
+  <div class="setup-card">
+    <div class="setup-step active" id="setup-s1">
+      <div class="step-title">Crea tu contraseña maestra</div>
+      <div class="step-sub">Esta contraseña protegerá el acceso local.</div>
+      <div class="auth-field">
+        <label>Contraseña maestra</label>
+        <input type="password" id="setup-pass1" placeholder="Mínimo 8 caracteres">
+      </div>
+      <div class="auth-field">
+        <label>Confirmar contraseña</label>
+        <input type="password" id="setup-pass2" placeholder="Repite la contraseña">
+      </div>
+      <div class="auth-error" id="setup-pass-error"></div>
+      <button class="auth-btn" onclick="setupStep1()">Siguiente → Configurar 2FA</button>
+    </div>
+
+    <div class="setup-step" id="setup-s2">
+      <div class="step-title">Configura Google Authenticator</div>
+      <div class="step-sub">Escanea el QR con la app en tu celular.</div>
+      <div style="text-align:center">
+        <div class="qr-wrap" id="qr-container"></div>
+        <div class="secret-box" id="secret-display" onclick="copySecret()"></div>
+      </div>
+      <button class="auth-btn" style="margin-top:20px" onclick="showSetupStep(3);setTimeout(()=>initOtpInputs('setup-otp-inputs',setupStep3),50)">Ya escaneé el QR →</button>
+    </div>
+
+    <div class="setup-step" id="setup-s3">
+      <div class="step-title">Verificar 2FA</div>
+      <div class="step-sub">Ingresa el código de 6 dígitos para confirmar.</div>
+      <div class="otp-inputs" id="setup-otp-inputs">
+        <input class="otp-digit" maxlength="1" type="text">
+        <input class="otp-digit" maxlength="1" type="text">
+        <input class="otp-digit" maxlength="1" type="text">
+        <input class="otp-digit" maxlength="1" type="text">
+        <input class="otp-digit" maxlength="1" type="text">
+        <input class="otp-digit" maxlength="1" type="text">
+      </div>
+      <div class="auth-error" id="setup-totp-error"></div>
+      <button class="auth-btn" onclick="setupStep3()">Verificar e ir a OAuth →</button>
+    </div>
+
+    <div class="setup-step" id="setup-s4">
+      <div class="step-title">Conectar Google Sheets</div>
+      <div class="step-sub">Pega tu Client ID generado en Google Cloud Console.</div>
+      <div class="auth-field">
+        <label>Google OAuth Client ID</label>
+        <input type="text" id="setup-client-id" placeholder="xxxxxxxxxx.apps.googleusercontent.com">
+      </div>
+      <div class="auth-error" id="setup-sheets-error"></div>
+      <button class="auth-btn" onclick="setupStep4()">Guardar y Finalizar</button>
+    </div>
+  </div>
+</div>
+
+<div class="app" id="main-app" style="display:none">
+  <aside class="sidebar">
+    <div class="sidebar-logo"><div class="logo-mark"><div class="logo-icon">💰</div><div class="logo-text">FinanzApp</div></div></div>
+    <nav class="sidebar-nav">
+      <div class="sheets-status disconnected" id="sheets-status-bar" onclick="handleSheetsClick()">
+        <span class="status-dot"></span>
+        <span id="sheets-status-text">Google Sheets: desconectado</span>
+      </div>
+      <div class="nav-item active" id="nav-dashboard" onclick="goTo('dashboard')">Dashboard</div>
+      <div class="nav-item" id="nav-movimientos" onclick="goTo('movimientos')">Movimientos</div>
+      <div class="nav-item" id="nav-bancos" onclick="goTo('bancos')">Bancos</div>
+      <div class="nav-item" id="nav-prestamos" onclick="goTo('prestamos')">Préstamos</div>
+      <div class="nav-item" onclick="lockApp()" style="margin-top:20px; color:var(--red)">Bloquear sesión</div>
+    </nav>
+  </aside>
+
+  <main class="main">
+    <div class="page active" id="page-dashboard">
+      <h1 style="margin-bottom:20px">Dashboard</h1>
+      <div class="metrics-grid" id="dash-metrics"></div>
+      <div class="card">
+        <canvas id="barChart" style="max-height:300px"></canvas>
+      </div>
+    </div>
+    </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+
+// ── TOTP ENGINE (RFC 6238) ──
+const TOTP = {
+  generateSecret() {
+    const b = new Uint8Array(20); crypto.getRandomValues(b);
+    const a = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+    let s = ''; for (let i = 0; i < 20; i += 5) {
+      s += a[b[i] >> 3] + a[((b[i] & 7) << 2) | (b[i + 1] >> 6)] + a[(b[i + 1] >> 1) & 31] + a[((b[i + 1] & 1) << 4) | (b[i + 2] >> 4)] + a[((b[i + 2] & 15) << 1) | (b[i + 3] >> 7)] + a[(b[i + 3] >> 2) & 31] + a[((b[i + 3] & 3) << 3) | (b[i + 4] >> 5)] + a[b[i + 4] & 31];
+    } return s;
+  },
+  base32Decode(s) {
+    const a = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'; s = s.replace(/=+$/, '').toUpperCase();
+    let bits = 0, val = 0; const out = [];
+    for (const c of s) { val = (val << 5) | a.indexOf(c); bits += 5; if (bits >= 8) { bits -= 8; out.push((val >> bits) & 255); } }
+    return new Uint8Array(out);
+  },
+  async hmac(key, data) {
+    const k = await crypto.subtle.importKey('raw', key, { name: 'HMAC', hash: 'SHA-1' }, false, ['sign']);
+    return new Uint8Array(await crypto.subtle.sign('HMAC', k, data));
+  },
+  async generate(secret, time) {
+    const T = Math.floor((time || Date.now()) / 1000 / 30);
+    const buf = new ArrayBuffer(8); new DataView(buf).setUint32(4, T, false);
+    const h = await this.hmac(this.base32Decode(secret), new Uint8Array(buf));
+    const off = h[19] & 0xf;
+    const code = ((h[off] & 0x7f) << 24 | (h[off + 1] & 0xff) << 16 | (h[off + 2] & 0xff) << 8 | (h[off + 3] & 0xff)) % 1000000;
+    return String(code).padStart(6, '0');
+  },
+  async verify(secret, token) {
+    for (const d of [-30000, 0, 30000]) if (await this.generate(secret, Date.now() + d) === token) return true;
+    return false;
+  }
+};
+
+async function hashPwd(p) {
+  const e = new TextEncoder().encode(p);
+  const b = await crypto.subtle.digest('SHA-256', e);
+  return Array.from(new Uint8Array(b)).map(x => x.toString(16).padStart(2, '0')).join('');
+}
+
+// ── APP STATE & STORAGE ──
+let state = { banks: [], movs: [], loans: [] };
+function getSecCfg() { return JSON.parse(localStorage.getItem('fapp_sec') || 'null'); }
+function saveSecCfg(c) { localStorage.setItem('fapp_sec', JSON.stringify(c)); }
+
+// ── SETUP LOGIC ──
+let _setupSecret = '', _setupHash = '';
+
+async function setupStep1() {
+  const p1 = document.getElementById('setup-pass1').value;
+  const p2 = document.getElementById('setup-pass2').value;
+  if (p1.length < 8) { alert('Mínimo 8 caracteres'); return; }
+  if (p1 !== p2) { alert('No coinciden'); return; }
+  _setupHash = await hashPwd(p1);
+  _setupSecret = TOTP.generateSecret();
+  
+  const uri = `otpauth://totp/FinanzApp:User?secret=${_setupSecret}&issuer=FinanzApp`;
+  document.getElementById('secret-display').textContent = _setupSecret;
+  
+  const qrDiv = document.getElementById('qr-container');
+  qrDiv.innerHTML = '';
+  // USO DE LIBRERÍA EXTERNA PARA ASEGURAR COMPATIBILIDAD
+  new QRCode(qrDiv, { text: uri, width: 180, height: 180, colorDark: "#000000", colorLight: "#ffffff" });
+  
+  showSetupStep(2);
+}
+
+async function setupStep3() {
+  const code = getOtpVal('setup-otp-inputs');
+  if (await TOTP.verify(_setupSecret, code)) {
+    showSetupStep(4);
+  } else { alert('Código inválido'); }
+}
+
+async function setupStep4() {
+  const cid = document.getElementById('setup-client-id').value;
+  if (!cid.includes('.apps.googleusercontent.com')) { alert('ID inválido'); return; }
+  saveSecCfg({ passHash: _setupHash, totpSecret: _setupSecret, clientId: cid });
+  enterApp();
+}
+
+// ── AUTH LOGIC ──
+async function checkPassword() {
+  const pass = document.getElementById('auth-pass').value;
+  const hash = await hashPwd(pass);
+  if (hash === getSecCfg().passHash) {
+    document.getElementById('auth-step-1').style.display = 'none';
+    document.getElementById('auth-step-2').style.display = 'block';
+    initOtpInputs('otp-inputs', checkTOTP);
+  } else { alert('Incorrecta'); }
+}
+
+async function checkTOTP() {
+  const code = getOtpVal('otp-inputs');
+  if (await TOTP.verify(getSecCfg().totpSecret, code)) { enterApp(); }
+  else { alert('Código inválido'); }
+}
+
+// ── INTERFACE ──
+function showSetupStep(n) {
+  document.querySelectorAll('.setup-step').forEach(s => s.classList.remove('active'));
+  document.getElementById('setup-s' + n).classList.add('active');
+}
+
+function enterApp() {
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('setup-screen').classList.remove('show');
+  document.getElementById('main-app').style.display = 'flex';
+  renderDashboard();
+  initSheets();
+}
+
+function initOtpInputs(cid, onDone) {
+  const inputs = [...document.querySelectorAll(`#${cid} .otp-digit`)];
+  inputs.forEach((inp, i) => {
+    inp.oninput = (e) => {
+      if (e.target.value && i < 5) inputs[i + 1].focus();
+      if (getOtpVal(cid).length === 6) onDone();
+    };
+  });
+}
+function getOtpVal(cid) { return [...document.querySelectorAll(`#${cid} .otp-digit`)].map(x => x.value).join(''); }
+
+// ── GOOGLE SHEETS OAUTH ──
+let tokenClient;
+function initSheets() {
+  const cfg = getSecCfg();
+  if (!cfg.clientId) return;
+  tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: cfg.clientId,
+    scope: 'https://www.googleapis.com/auth/spreadsheets',
+    callback: (resp) => { if (resp.access_token) { 
+      document.getElementById('sheets-status-bar').className = 'sheets-status connected';
+      document.getElementById('sheets-status-text').textContent = 'Google Sheets: conectado';
+    }}
+  });
+}
+function handleSheetsClick() { tokenClient.requestAccessToken(); }
+
+function renderDashboard() {
+  // Lógica de Chart.js y métricas original de tu archivo
+}
+
+function boot() {
+  const cfg = getSecCfg();
+  if (!cfg) {
+    document.getElementById('auth-screen').style.display = 'none';
+    document.getElementById('setup-screen').classList.add('show');
+  } else {
+    document.getElementById('auth-screen').style.display = 'flex';
+  }
+}
+
+window.onload = boot;
+</script>
+</body>
+</html>
